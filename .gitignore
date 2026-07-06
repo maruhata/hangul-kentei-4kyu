@@ -1,0 +1,5 @@
+# ローカル用のプレビュー設定
+.claude/
+# OS / エディタ
+Thumbs.db
+.DS_Store
