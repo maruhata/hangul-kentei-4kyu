@@ -888,15 +888,17 @@ const EXAM_SETS=[
   {q:'助数詞：「犬3匹」を韓国語で',opts:[["개 세 마리",true],["개 세 개",false],["개 삼 마리",false],["개 셋 마리",false]]},
 ]},
 ];
-let exam={items:[],i:0,answered:false,lis:0,wr:0,set:0};
+let exam={items:[],i:0,answered:false,lis:0,wr:0,key:0,name:'',random:false};
 function buildExam(){
   const el=document.getElementById("view-exam");
   const best=store.get("examBest",{});
   el.innerHTML=`
   <h2>模擬試験 <span class="badge">STEP8</span></h2>
-  <p class="lead">本番形式（聞きとり10問＝40点＋筆記15問＝60点、計100点）。<b>60点以上で合格</b>。第1回→第3回と挑戦しましょう。各回は毎回同じ問題なので、復習にも使えます。</p>
+  <p class="lead">本番形式（聞きとり10問＝40点＋筆記15問＝60点、計100点）。<b>60点以上で合格</b>。</p>
   <div id="examIntro">
-    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+    <h3 style="margin-top:6px">📝 直前対策（固定3回）</h3>
+    <p style="color:var(--muted);font-size:13px;margin:2px 0 8px">毎回同じ問題。本番前の総仕上げ・復習に。</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
       ${EXAM_SETS.map((s,i)=>`
         <button class="btn" style="padding:18px 14px;text-align:center" onclick="startExam(${i})">
           <div style="font-weight:800;font-size:17px">${s.name}</div>
@@ -904,18 +906,30 @@ function buildExam(){
           <div style="font-size:12px;margin-top:4px;color:${best[i]!=null?(best[i]>=60?'var(--good)':'var(--warn)'):'var(--muted)'}">${best[i]!=null?(best[i]>=60?"✅ 合格":"再挑戦"):"未挑戦"}</div>
         </button>`).join("")}
     </div>
-    <div class="note" style="margin-top:14px">🔊 聞きとりは音声が自動再生されます。うまく再生されない場合は「もう一度聞く」を押してください（初回はブラウザの許可が必要な場合があります）。初級のうちは「スクリプトを見る」でハングルを確認しながらでもOK。</div>
+    <h3>🎲 ランダム練習</h3>
+    <p style="color:var(--muted);font-size:13px;margin:2px 0 8px">全問題からランダムに25問。毎回ちがう組み合わせで、何度でも練習できます。</p>
+    <button class="btn primary" style="font-size:15px;padding:12px 24px" onclick="startExamRandom()">🎲 ランダムで挑戦　<span style="font-weight:400;font-size:12px;opacity:.85">自己ベスト ${best['r']!=null?best['r']+"点":"-"}</span></button>
+    <div class="note" style="margin-top:16px">🔊 聞きとりは音声が自動再生されます。うまく再生されない場合は「もう一度聞く」を押してください（初回はブラウザの許可が必要な場合があります）。初級のうちは「スクリプトを見る」でハングルを確認しながらでもOK。</div>
   </div>
   <div id="examArea"></div>`;
 }
-function startExam(idx){
-  idx=idx||0;
-  const s=EXAM_SETS[idx];
-  const lis=s.listen.map(x=>({sec:'listen',...x}));
-  const wr=s.write.map(x=>({sec:'write',...x}));
-  exam={items:[...lis,...wr],i:0,answered:false,lis:0,wr:0,set:idx};
+function uniqBy(arr,f){const seen=new Set();return arr.filter(x=>{const k=f(x);if(seen.has(k))return false;seen.add(k);return true;});}
+function loadExam(listen,write,key,name,random){
+  const lis=listen.map(x=>({sec:'listen',...x}));
+  const wr=write.map(x=>({sec:'write',...x}));
+  exam={items:[...lis,...wr],i:0,answered:false,lis:0,wr:0,key,name,random};
   document.getElementById("examIntro").style.display="none";
   renderExam();
+}
+function startExam(idx){
+  idx=idx||0; const s=EXAM_SETS[idx];
+  loadExam(s.listen,s.write,idx,s.name,false);
+}
+function startExamRandom(){
+  let allL=[],allW=[];
+  EXAM_SETS.forEach(s=>{allL=allL.concat(s.listen);allW=allW.concat(s.write);});
+  allL=uniqBy(allL,x=>x.audio); allW=uniqBy(allW,x=>x.q);
+  loadExam(shuffle(allL).slice(0,10),shuffle(allW).slice(0,15),'r','ランダム練習',true);
 }
 function renderExam(){
   const area=document.getElementById("examArea");
@@ -925,7 +939,7 @@ function renderExam(){
   const secLabel=isL?`🔊 聞きとり ${exam.i+1}/10`:`✏️ 筆記 ${exam.i-9}/15`;
   area.innerHTML=`
   <div class="qbox">
-    <div class="qmeta"><span>${secLabel}</span><span>${EXAM_SETS[exam.set].name}・${exam.i+1}/${exam.items.length}問</span></div>
+    <div class="qmeta"><span>${secLabel}</span><span>${exam.name}・${exam.i+1}/${exam.items.length}問</span></div>
     ${isL?`
       <div style="text-align:center;margin:6px 0 14px">
         <button class="btn primary" onclick="speakKo('${it.audio.replace(/'/g,"\\'")}',event)">🔊 もう一度聞く</button>
@@ -965,13 +979,13 @@ function finishExam(){
   const lisPts=exam.lis*4, wrPts=exam.wr*4, total=lisPts+wrPts;
   const pass=total>=60;
   const best=store.get("examBest",{});
-  const prev=best[exam.set];
+  const prev=best[exam.key];
   const isNew=prev==null||total>prev;
-  if(isNew){best[exam.set]=total;store.set("examBest",best);}
+  if(isNew){best[exam.key]=total;store.set("examBest",best);}
   renderHomeKpi();
   area.innerHTML=`
   <div class="qbox result">
-    <div style="font-size:14px;color:var(--muted)">${EXAM_SETS[exam.set].name} の結果</div>
+    <div style="font-size:14px;color:var(--muted)">${exam.name} の結果</div>
     <div style="font-size:20px;font-weight:700;color:${pass?'var(--good)':'var(--bad)'}">${pass?'🎉 合格ライン到達！':'📖 もう少し！'}</div>
     <div class="score" style="color:${pass?'var(--good)':'var(--bad)'}">${total}点</div>
     <div style="color:var(--muted);font-size:14px">合格ライン 60点 ${isNew?'　<b style="color:var(--accent2)">自己ベスト更新！</b>':''}</div>
@@ -984,8 +998,8 @@ function finishExam(){
       ${pass?'この調子で他の回にも挑戦してみましょう。':total>=48?'あと一歩。間違えた文法・単語を復習してもう一度！':'文法タブと単語帳を回してから再挑戦しましょう。'}
     </div>
     <div class="toolbar" style="justify-content:center;margin-top:18px">
-      <button class="btn primary" onclick="startExam(${exam.set})">同じ回をもう一度</button>
-      <button class="btn" onclick="buildExam();window.scrollTo({top:0,behavior:'smooth'})">回を選ぶ</button>
+      <button class="btn primary" onclick="${exam.random?'startExamRandom()':'startExam('+exam.key+')'}">${exam.random?'もう一度ランダム':'同じ回をもう一度'}</button>
+      <button class="btn" onclick="buildExam();window.scrollTo({top:0,behavior:'smooth'})">メニューに戻る</button>
     </div>
   </div>`;
 }
