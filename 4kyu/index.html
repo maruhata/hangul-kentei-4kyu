@@ -801,25 +801,21 @@ function finishQuiz(){
 }
 
 /* ---------- 模擬試験 ---------- */
-// 聞きとり(TTSで読み上げ) : 各4点
-const EXAM_LISTEN=[
+// 模擬試験セット（各回=聞きとり10問＋筆記15問＝100点）
+const EXAM_SETS=[
+{ name:"第1回", listen:[
   {audio:"안녕히 계세요",q:"意味は？",opts:[["さようなら（その場に残る人へ）",true],["いらっしゃいませ",false],["おやすみなさい",false],["ありがとうございます",false]]},
-  {audio:"생일 축하해요",q:"意味は？",opts:[["お誕生日おめでとう",true],["結婚おめでとう",false],["ありがとう",false],["さようなら",false]]},
-  {audio:"몇 시에 만날까요?",q:"適切な答えは？",opts:[["두 시에 만나요",true],["두 개 있어요",false],["두 명이에요",false],["이천 원이에요",false]]},
   {audio:"이거 얼마예요?",q:"何を尋ねていますか？",opts:[["値段",true],["時間",false],["場所",false],["個数",false]]},
-  {audio:"오천육백 원입니다",q:"いくらですか？",opts:[["5,600ウォン",true],["5,060ウォン",false],["56,000ウォン",false],["6,500ウォン",false]]},
-  {audio:"화장실이 어디에 있어요?",q:"何を尋ねていますか？",opts:[["トイレの場所",true],["トイレの数",false],["今の時間",false],["値段",false]]},
   {audio:"저는 회사원이에요",q:"意味は？",opts:[["私は会社員です",true],["私は学生です",false],["私は医者です",false],["私は主婦です",false]]},
-  {audio:"내일 비가 올 거예요",q:"意味は？",opts:[["明日、雨が降るでしょう",true],["昨日、雨が降りました",false],["今日は晴れです",false],["明日は雪でしょう",false]]},
   {audio:"커피 한 잔 주세요",q:"意味は？",opts:[["コーヒーを一杯ください",true],["コーヒーはいくらですか",false],["コーヒーが好きです",false],["コーヒーを飲みました",false]]},
-  {audio:"우리 같이 밥 먹을까요?",q:"適切な答えは？",opts:[["네, 좋아요",true],["네, 없어요",false],["아니요, 세 개예요",false],["여기예요",false]]},
   {audio:"가족이 몇 명이에요?",q:"何を尋ねていますか？",opts:[["家族の人数",true],["家族の名前",false],["年齢",false],["住所",false]]},
+  {audio:"내일 비가 올 거예요",q:"意味は？",opts:[["明日、雨が降るでしょう",true],["昨日、雨が降りました",false],["今日は晴れです",false],["明日は雪でしょう",false]]},
   {audio:"천천히 말해 주세요",q:"意味は？",opts:[["ゆっくり話してください",true],["早く話してください",false],["もう一度言ってください",false],["大きな声で話して",false]]},
-];
-// 筆記 : 各4点
-const EXAM_WRITE=[
+  {audio:"몇 시에 만날까요?",q:"適切な答えは？",opts:[["두 시에 만나요",true],["두 개 있어요",false],["두 명이에요",false],["이천 원이에요",false]]},
+  {audio:"화장실이 어디에 있어요?",q:"何を尋ねていますか？",opts:[["トイレの場所",true],["トイレの数",false],["今の時間",false],["値段",false]]},
+  {audio:"오천육백 원입니다",q:"いくらですか？",opts:[["5,600ウォン",true],["5,060ウォン",false],["56,000ウォン",false],["6,500ウォン",false]]},
+], write:[
   {q:'発音問題：<b>같이</b> の実際の発音は？',opts:[["[가치]",true],["[가티]",false],["[갇이]",false],["[가시]",false]]},
-  {q:'発音問題：<b>학교</b> の実際の発音は？',opts:[["[학꾜]",true],["[학교]",false],["[하교]",false],["[항교]",false]]},
   {q:'助詞：학교___ 가요.（学校<b>に</b>行きます）',opts:[["에",true],["에서",false],["를",false],["도",false]]},
   {q:'活用：먹다 の해요体は？',opts:[["먹어요",true],["먹아요",false],["먹여요",false],["머거요",false]]},
   {q:'過去形：가다 →（行きました）',opts:[["갔어요",true],["가았어요",false],["갔서요",false],["가겠어요",false]]},
@@ -827,43 +823,97 @@ const EXAM_WRITE=[
   {q:'可能：운전___ 수 있어요.（運転できます）',opts:[["할",true],["한",false],["하고",false],["해서",false]]},
   {q:'願望：한국에 가고 ___.（行きたいです）',opts:[["싶어요",true],["있어요",false],["보여요",false],["주세요",false]]},
   {q:'反対語：크다（大きい）⇔',opts:[["작다",true],["많다",false],["높다",false],["길다",false]]},
-  {q:'反対語：비싸다（高い）⇔',opts:[["싸다",true],["좋다",false],["많다",false],["쉽다",false]]},
   {q:'語彙：병원 の意味は？',opts:[["病院",true],["銀行",false],["学校",false],["市場",false]]},
-  {q:'語彙：내일 の意味は？',opts:[["明日",true],["昨日",false],["今日",false],["毎日",false]]},
   {q:'数：「3時30分」を韓国語で',opts:[["세 시 삼십 분",true],["삼 시 삼십 분",false],["세 시 서른 분",false],["삼 시 서른 분",false]]},
   {q:'助詞：집___ 공부해요.（家<b>で</b>勉強します）',opts:[["에서",true],["에",false],["으로",false],["까지",false]]},
-  {q:'理由：시간이 없___ 못 가요.（〜ないので）',opts:[["어서",true],["지만",false],["고",false],["면",false]]},
   {q:'尊敬：앉다 →（お座りください）',opts:[["앉으세요",true],["앉으요",false],["앉세요",false],["앉아세요",false]]},
   {q:'変則：춥다 の해요体は？',opts:[["추워요",true],["춥어요",false],["추어요",false],["춥워요",false]]},
   {q:'依頼：기다려 ___.（待ってください）',opts:[["주세요",true],["싶어요",false],["있어요",false],["봤어요",false]]},
-  {q:'あいさつ：自分が先に帰るとき、残る人に言う言葉は？',opts:[["안녕히 계세요",true],["안녕히 가세요",false],["어서 오세요",false],["잘 먹겠습니다",false]]},
   {q:'助数詞：「りんご2個」を韓国語で',opts:[["사과 두 개",true],["사과 둘 개",false],["사과 이 개",false],["사과 두 명",false]]},
+]},
+{ name:"第2回", listen:[
+  {audio:"생일 축하해요",q:"意味は？",opts:[["お誕生日おめでとう",true],["結婚おめでとう",false],["ありがとう",false],["さようなら",false]]},
+  {audio:"우리 같이 밥 먹을까요?",q:"適切な答えは？",opts:[["네, 좋아요",true],["네, 없어요",false],["아니요, 세 개예요",false],["여기예요",false]]},
+  {audio:"지금 몇 시예요?",q:"適切な答えは？",opts:[["세 시예요",true],["세 개예요",false],["세 명이에요",false],["삼천 원이에요",false]]},
+  {audio:"주말에 뭐 했어요?",q:"適切な答えは？",opts:[["영화를 봤어요",true],["영화를 볼 거예요",false],["영화관이에요",false],["영화를 좋아해요",false]]},
+  {audio:"이 옷 정말 예뻐요",q:"意味は？",opts:[["この服、本当にかわいい",true],["この服は高い",false],["この服は安い",false],["この服は大きい",false]]},
+  {audio:"약속 시간에 늦었어요",q:"意味は？",opts:[["約束の時間に遅れました",true],["約束を忘れました",false],["約束をしました",false],["約束を守りました",false]]},
+  {audio:"물 좀 주시겠어요?",q:"意味は？",opts:[["お水をいただけますか",true],["水はいくらですか",false],["水が好きです",false],["水を飲みました",false]]},
+  {audio:"표가 얼마예요?",q:"何を尋ねていますか？",opts:[["チケットの値段",true],["チケットの場所",false],["時間",false],["枚数",false]]},
+  {audio:"저기 지하철역이 있어요",q:"意味は？",opts:[["あそこに地下鉄の駅があります",true],["ここにバス停があります",false],["あそこに銀行があります",false],["ここに駅がありません",false]]},
+  {audio:"오늘은 좀 추워요",q:"意味は？",opts:[["今日はちょっと寒いです",true],["今日は暑いです",false],["今日は暖かいです",false],["今日は涼しいです",false]]},
+], write:[
+  {q:'発音問題：<b>학교</b> の実際の発音は？',opts:[["[학꾜]",true],["[학교]",false],["[하교]",false],["[항교]",false]]},
+  {q:'発音問題：<b>한국어</b> の実際の発音は？',opts:[["[한구거]",true],["[한국어]",false],["[항구거]",false],["[한구커]",false]]},
+  {q:'助詞：친구___ 선물을 줘요.（友だち<b>に</b>）',opts:[["한테",true],["에서",false],["으로",false],["까지",false]]},
+  {q:'活用：듣다 の해요体は？',opts:[["들어요",true],["듣어요",false],["들으요",false],["듣아요",false]]},
+  {q:'過去形：마시다 →（飲みました）',opts:[["마셨어요",true],["마시었어요",false],["마샸어요",false],["마시겠어요",false]]},
+  {q:'連結：밥을 먹___ 학교에 가요.（〜して）',opts:[["고",true],["서",false],["면",false],["지만",false]]},
+  {q:'理由：시간이 없___ 못 가요.（〜ないので）',opts:[["어서",true],["지만",false],["고",false],["면",false]]},
+  {q:'進行：뭐 하___ 있어요?（〜している）',opts:[["고",true],["서",false],["면",false],["지",false]]},
+  {q:'反対語：비싸다（高い）⇔',opts:[["싸다",true],["좋다",false],["많다",false],["쉽다",false]]},
+  {q:'語彙：내일 の意味は？',opts:[["明日",true],["昨日",false],["今日",false],["毎日",false]]},
+  {q:'変則：바쁘다 の해요体は？（으変則）',opts:[["바빠요",true],["바쁘어요",false],["바뻐요",false],["바쁴요",false]]},
+  {q:'助詞：9시___ 5시까지 일해요.（〜から）',opts:[["부터",true],["까지",false],["보다",false],["마다",false]]},
+  {q:'尊敬：드시다 の意味は？（먹다の尊敬）',opts:[["召し上がる",true],["差し上げる",false],["いらっしゃる",false],["お休みになる",false]]},
+  {q:'依頼：창문을 열어 ___.（開けてください）',opts:[["주세요",true],["싶어요",false],["있어요",false],["봤어요",false]]},
+  {q:'助数詞：「コーヒー2杯」を韓国語で',opts:[["커피 두 잔",true],["커피 둘 잔",false],["커피 이 잔",false],["커피 두 개",false]]},
+]},
+{ name:"第3回", listen:[
+  {audio:"실례합니다",q:"意味は？",opts:[["失礼します",true],["ありがとうございます",false],["こんにちは",false],["さようなら",false]]},
+  {audio:"이름이 뭐예요?",q:"何を尋ねていますか？",opts:[["名前",true],["年齢",false],["場所",false],["値段",false]]},
+  {audio:"몇 살이에요?",q:"適切な答えは？",opts:[["스무 살이에요",true],["스무 개예요",false],["세 시예요",false],["삼천 원이에요",false]]},
+  {audio:"어제 뭐 했어요?",q:"適切な答えは？",opts:[["친구를 만났어요",true],["친구를 만날 거예요",false],["친구가 있어요",false],["친구예요",false]]},
+  {audio:"날씨가 정말 좋아요",q:"意味は？",opts:[["天気が本当にいいです",true],["天気が悪いです",false],["暑いです",false],["寒いです",false]]},
+  {audio:"한국어를 배우고 싶어요",q:"意味は？",opts:[["韓国語を習いたいです",true],["韓国語が上手です",false],["韓国語を教えます",false],["韓国語は難しいです",false]]},
+  {audio:"여기에서 사진을 찍어도 돼요?",q:"意味は？",opts:[["ここで写真を撮ってもいいですか",true],["写真を撮りました",false],["写真が好きです",false],["写真はいくらですか",false]]},
+  {audio:"버스로 가면 얼마나 걸려요?",q:"何を尋ねていますか？",opts:[["どのくらい時間がかかるか",true],["いくらか",false],["どこか",false],["何時か",false]]},
+  {audio:"이 근처에 은행이 있어요?",q:"何を尋ねていますか？",opts:[["近くに銀行があるか",true],["銀行の名前",false],["銀行の時間",false],["銀行員の数",false]]},
+  {audio:"다음 주에 시험이 있어요",q:"意味は？",opts:[["来週、試験があります",true],["先週、試験がありました",false],["今日、試験があります",false],["試験がありません",false]]},
+], write:[
+  {q:'発音問題：<b>좋아요</b> の実際の発音は？',opts:[["[조아요]",true],["[졷아요]",false],["[조하요]",false],["[좋가요]",false]]},
+  {q:'発音問題：<b>입니다</b> の実際の発音は？',opts:[["[임니다]",true],["[입니다]",false],["[인니다]",false],["[이비다]",false]]},
+  {q:'助詞：버스___ 가요.（バス<b>で</b>）',opts:[["로",true],["으로",false],["에서",false],["를",false]]},
+  {q:'活用：공부하다 の해요体は？',opts:[["공부해요",true],["공부하요",false],["공부해여",false],["공부햬요",false]]},
+  {q:'逆接：비싸___ 맛있어요.（〜けど）',opts:[["지만",true],["아서",false],["니까",false],["면",false]]},
+  {q:'仮定：시간이 있___ 만나요.（〜たら）',opts:[["으면",true],["어서",false],["지만",false],["고",false]]},
+  {q:'못 가요 の意味は？',opts:[["行けません",true],["行きます",false],["行きたいです",false],["行きました",false]]},
+  {q:'反対語：많다（多い）⇔',opts:[["적다",true],["작다",false],["낮다",false],["짧다",false]]},
+  {q:'語彙：학생 の意味は？',opts:[["学生",true],["先生",false],["医者",false],["会社員",false]]},
+  {q:'尊敬：있다（いる）の尊敬語は？',opts:[["계시다",true],["드시다",false],["주무시다",false],["모시다",false]]},
+  {q:'変則：걷다 の해요体は？',opts:[["걸어요",true],["걷어요",false],["거러요",false],["걷아요",false]]},
+  {q:'数：「1時半」を韓国語で',opts:[["한 시 반",true],["일 시 반",false],["하나 시 반",false],["한 시 절반",false]]},
+  {q:'助詞：물___ 마셔요.（水<b>だけ</b>）',opts:[["만",true],["도",false],["보다",false],["까지",false]]},
+  {q:'願望：쉬고 ___.（休みたいです）',opts:[["싶어요",true],["있어요",false],["주세요",false],["보여요",false]]},
+  {q:'助数詞：「犬3匹」を韓国語で',opts:[["개 세 마리",true],["개 세 개",false],["개 삼 마리",false],["개 셋 마리",false]]},
+]},
 ];
-let exam={items:[],i:0,answered:false,lis:0,wr:0};
+let exam={items:[],i:0,answered:false,lis:0,wr:0,set:0};
 function buildExam(){
   const el=document.getElementById("view-exam");
-  const best=store.get("examBest",null);
+  const best=store.get("examBest",{});
   el.innerHTML=`
   <h2>模擬試験 <span class="badge">STEP8</span></h2>
-  <p class="lead">本番形式（聞きとり10問＝40点＋筆記15問＝60点、計100点）。<b>60点以上で合格</b>。聞きとりは🔊で韓国語が読み上げられます。静かな場所で挑戦しましょう。</p>
-  <div class="card" id="examIntro">
-    <div class="kpi">
-      <div><div class="n">25問</div><div class="l">問題数</div></div>
-      <div><div class="n">100点</div><div class="l">満点</div></div>
-      <div><div class="n" style="color:var(--good)">60点</div><div class="l">合格ライン</div></div>
-      <div><div class="n">${best!=null?best+"点":"-"}</div><div class="l">自己ベスト</div></div>
+  <p class="lead">本番形式（聞きとり10問＝40点＋筆記15問＝60点、計100点）。<b>60点以上で合格</b>。第1回→第3回と挑戦しましょう。各回は毎回同じ問題なので、復習にも使えます。</p>
+  <div id="examIntro">
+    <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr))">
+      ${EXAM_SETS.map((s,i)=>`
+        <button class="btn" style="padding:18px 14px;text-align:center" onclick="startExam(${i})">
+          <div style="font-weight:800;font-size:17px">${s.name}</div>
+          <div style="color:var(--muted);font-size:12px;margin-top:6px">自己ベスト ${best[i]!=null?best[i]+"点":"-"}</div>
+          <div style="font-size:12px;margin-top:4px;color:${best[i]!=null?(best[i]>=60?'var(--good)':'var(--warn)'):'var(--muted)'}">${best[i]!=null?(best[i]>=60?"✅ 合格":"再挑戦"):"未挑戦"}</div>
+        </button>`).join("")}
     </div>
-    <div class="note">🔊 聞きとりは音声が自動再生されます。うまく再生されない場合は「もう一度聞く」を押してください（初回はブラウザの許可が必要な場合があります）。初級のうちは「スクリプトを見る」でハングルを確認しながらでもOK。</div>
-    <div style="text-align:center;margin-top:14px">
-      <button class="btn primary" style="font-size:16px;padding:12px 28px" onclick="startExam()">▶ 模擬試験を始める</button>
-    </div>
+    <div class="note" style="margin-top:14px">🔊 聞きとりは音声が自動再生されます。うまく再生されない場合は「もう一度聞く」を押してください（初回はブラウザの許可が必要な場合があります）。初級のうちは「スクリプトを見る」でハングルを確認しながらでもOK。</div>
   </div>
   <div id="examArea"></div>`;
 }
-function startExam(){
-  const lis=shuffle(EXAM_LISTEN).slice(0,10).map(x=>({sec:'listen',...x}));
-  const wr=shuffle(EXAM_WRITE).slice(0,15).map(x=>({sec:'write',...x}));
-  exam={items:[...lis,...wr],i:0,answered:false,lis:0,wr:0};
+function startExam(idx){
+  idx=idx||0;
+  const s=EXAM_SETS[idx];
+  const lis=s.listen.map(x=>({sec:'listen',...x}));
+  const wr=s.write.map(x=>({sec:'write',...x}));
+  exam={items:[...lis,...wr],i:0,answered:false,lis:0,wr:0,set:idx};
   document.getElementById("examIntro").style.display="none";
   renderExam();
 }
@@ -875,7 +925,7 @@ function renderExam(){
   const secLabel=isL?`🔊 聞きとり ${exam.i+1}/10`:`✏️ 筆記 ${exam.i-9}/15`;
   area.innerHTML=`
   <div class="qbox">
-    <div class="qmeta"><span>${secLabel}</span><span>${exam.i+1} / ${exam.items.length}問</span></div>
+    <div class="qmeta"><span>${secLabel}</span><span>${EXAM_SETS[exam.set].name}・${exam.i+1}/${exam.items.length}問</span></div>
     ${isL?`
       <div style="text-align:center;margin:6px 0 14px">
         <button class="btn primary" onclick="speakKo('${it.audio.replace(/'/g,"\\'")}',event)">🔊 もう一度聞く</button>
@@ -914,12 +964,14 @@ function finishExam(){
   const area=document.getElementById("examArea");
   const lisPts=exam.lis*4, wrPts=exam.wr*4, total=lisPts+wrPts;
   const pass=total>=60;
-  const best=store.get("examBest",null);
-  const isNew=best==null||total>best;
-  if(isNew)store.set("examBest",total);
+  const best=store.get("examBest",{});
+  const prev=best[exam.set];
+  const isNew=prev==null||total>prev;
+  if(isNew){best[exam.set]=total;store.set("examBest",best);}
   renderHomeKpi();
   area.innerHTML=`
   <div class="qbox result">
+    <div style="font-size:14px;color:var(--muted)">${EXAM_SETS[exam.set].name} の結果</div>
     <div style="font-size:20px;font-weight:700;color:${pass?'var(--good)':'var(--bad)'}">${pass?'🎉 合格ライン到達！':'📖 もう少し！'}</div>
     <div class="score" style="color:${pass?'var(--good)':'var(--bad)'}">${total}点</div>
     <div style="color:var(--muted);font-size:14px">合格ライン 60点 ${isNew?'　<b style="color:var(--accent2)">自己ベスト更新！</b>':''}</div>
@@ -929,11 +981,11 @@ function finishExam(){
       <div><div class="n">${exam.lis+exam.wr}/25</div><div class="l">正解数</div></div>
     </div>
     <div style="color:var(--muted);font-size:13.5px;margin-top:6px">
-      ${pass?'この調子で過去問も時間を計って解いてみましょう。':total>=48?'あと一歩。間違えた文法・単語を復習してもう一度！':'文法タブと単語帳を回してから再挑戦しましょう。'}
+      ${pass?'この調子で他の回にも挑戦してみましょう。':total>=48?'あと一歩。間違えた文法・単語を復習してもう一度！':'文法タブと単語帳を回してから再挑戦しましょう。'}
     </div>
     <div class="toolbar" style="justify-content:center;margin-top:18px">
-      <button class="btn primary" onclick="startExam()">もう一度受ける</button>
-      <button class="btn" onclick="buildExam();window.scrollTo({top:0,behavior:'smooth'})">最初の画面へ</button>
+      <button class="btn primary" onclick="startExam(${exam.set})">同じ回をもう一度</button>
+      <button class="btn" onclick="buildExam();window.scrollTo({top:0,behavior:'smooth'})">回を選ぶ</button>
     </div>
   </div>`;
 }
