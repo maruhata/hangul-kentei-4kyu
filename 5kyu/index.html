@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ハングル能力検定 5級 合格教材</title>
+<script src="vocab.js"></script>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#1a1f36; --panel2:#232a49; --line:#33406b;
+    --text:#e8ecff; --muted:#9aa4cf; --accent:#5b8cff; --accent2:#33d6a6;
+    --warn:#ffb24d; --bad:#ff6b8a; --good:#33d6a6; --chip:#2a3358;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Segoe UI","Hiragino Kaku Gothic ProN","Meiryo","Malgun Gothic",sans-serif;
+    background:linear-gradient(180deg,#0d1020,#141a30 60%,#0d1020);
+    color:var(--text); line-height:1.6; min-height:100vh;
+  }
+  header{
+    position:sticky; top:0; z-index:50;
+    background:rgba(15,18,32,.9); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .hwrap{max-width:1000px;margin:0 auto;padding:14px 18px}
+  h1{font-size:19px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:12.5px}
+  nav{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+  nav button{
+    background:var(--chip);color:var(--text);border:1px solid var(--line);
+    padding:7px 13px;border-radius:999px;cursor:pointer;font-size:13px;transition:.15s;
+  }
+  nav button:hover{border-color:var(--accent)}
+  nav button.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  main{max-width:1000px;margin:0 auto;padding:22px 18px 80px}
+  .view{display:none;animation:fade .25s}
+  .view.active{display:block}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  h2{font-size:22px;margin:6px 0 6px;display:flex;align-items:center;gap:10px}
+  h2 .badge{font-size:11px;background:var(--accent);color:#fff;padding:2px 9px;border-radius:999px;font-weight:600}
+  h3{font-size:16px;margin:26px 0 10px;color:#cdd6ff;border-left:4px solid var(--accent);padding-left:10px}
+  p.lead{color:var(--muted);margin:0 0 16px}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0}
+  .grid{display:grid;gap:10px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th,td{border:1px solid var(--line);padding:8px 6px;text-align:center}
+  th{background:var(--panel2);color:#cdd6ff}
+  td .ko{font-size:20px;font-weight:700}
+  td .rd{font-size:11px;color:var(--muted)}
+  .cell{cursor:pointer;transition:.12s}
+  .cell:hover{background:var(--panel2)}
+  .kbig{font-size:26px;font-weight:800;color:#fff}
+  ul.clean{margin:8px 0;padding-left:20px}
+  ul.clean li{margin:5px 0}
+  .ko{color:#bcd0ff}
+  .hl{color:var(--accent2);font-weight:700}
+  .note{background:var(--panel2);border:1px dashed var(--line);border-radius:10px;padding:12px;font-size:13.5px;color:#d6ddff;margin:10px 0}
+  .tag{display:inline-block;font-size:11px;background:var(--chip);border:1px solid var(--line);color:var(--muted);padding:2px 8px;border-radius:6px;margin-right:6px}
+  .ex{background:var(--panel2);border-radius:10px;padding:10px 12px;margin:8px 0}
+  .ex .k{font-size:16px;color:#dfe6ff}
+  .ex .j{font-size:13px;color:var(--muted)}
+  .ex .r{font-size:12px;color:#7f8ac0}
+  /* grammar */
+  .gtopic{border:1px solid var(--line);border-radius:12px;margin:10px 0;overflow:hidden;background:var(--panel)}
+  .ghead{padding:13px 16px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+  .ghead:hover{background:var(--panel2)}
+  .gtitle{font-weight:700;font-size:15px}
+  .gform{color:var(--accent2);font-size:13px;font-family:monospace}
+  .gbody{padding:0 16px;max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+  .gtopic.open .gbody{max-height:1400px;padding:4px 16px 16px}
+  .arrow{transition:.2s;color:var(--muted)}
+  .gtopic.open .arrow{transform:rotate(90deg)}
+  /* flashcards */
+  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+  select,.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line);padding:8px 12px;border-radius:9px;font-size:13px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600}
+  .btn.good{background:var(--good);border-color:var(--good);color:#08221a;font-weight:700}
+  .btn.bad{background:var(--bad);border-color:var(--bad);color:#2a0410;font-weight:700}
+  .flash{
+    perspective:1200px; margin:16px auto; max-width:460px;
+  }
+  .flinner{position:relative;width:100%;height:230px;transition:transform .5s;transform-style:preserve-3d;cursor:pointer}
+  .flash.flipped .flinner{transform:rotateY(180deg)}
+  .fface{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;border:1px solid var(--line);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+  .ffront{background:linear-gradient(160deg,#243056,#1a2039)}
+  .fback{background:linear-gradient(160deg,#123a30,#0f2a24);transform:rotateY(180deg)}
+  .fko{font-size:46px;font-weight:800;color:#fff}
+  .from{font-size:15px;color:var(--muted);margin-top:8px}
+  .fja{font-size:26px;font-weight:700;color:#d7ffef}
+  .fcat{font-size:12px;color:var(--muted);margin-top:6px}
+  .counter{color:var(--muted);font-size:13px;text-align:center;margin-top:8px}
+  .spk{background:var(--chip);border:1px solid var(--line);color:var(--accent);border-radius:8px;
+    cursor:pointer;font-size:12px;padding:2px 7px;transition:.12s}
+  .spk:hover{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .spk.big{margin-top:14px;font-size:14px;padding:8px 16px;border-radius:999px}
+  .progressbar{height:8px;background:var(--panel2);border-radius:999px;overflow:hidden;margin:10px 0}
+  .progressbar>i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+  /* quiz */
+  .qbox{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:14px 0}
+  .qq{font-size:18px;margin-bottom:14px}
+  .qq .big{font-size:30px;font-weight:800;color:#fff}
+  .opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);
+    color:var(--text);padding:12px 14px;border-radius:10px;margin:8px 0;cursor:pointer;font-size:15px;transition:.12s}
+  .opt:hover{border-color:var(--accent)}
+  .opt.correct{background:rgba(51,214,166,.18);border-color:var(--good)}
+  .opt.wrong{background:rgba(255,107,138,.16);border-color:var(--bad)}
+  .opt.disabled{cursor:default;opacity:.9}
+  .qmeta{display:flex;justify-content:space-between;color:var(--muted);font-size:13px;margin-bottom:6px}
+  .result{text-align:center;padding:24px}
+  .result .score{font-size:52px;font-weight:800}
+  .kpi{display:flex;gap:10px;flex-wrap:wrap;margin:14px 0}
+  .kpi>div{flex:1;min-width:130px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;text-align:center}
+  .kpi .n{font-size:26px;font-weight:800}
+  .kpi .l{font-size:12px;color:var(--muted)}
+  .checklist{list-style:none;padding:0}
+  .checklist li{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;display:flex;gap:10px;align-items:flex-start}
+  .checklist input{margin-top:5px;transform:scale(1.3)}
+  a.link{color:var(--accent)}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:30px}
+  @media(max-width:600px){
+    .fko{font-size:38px}.result .score{font-size:42px}
+    td .ko{font-size:17px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="hwrap">
+    <h1>🇰🇷 ハングル能力検定 5級 合格教材</h1>
+    <div class="sub">ゼロから → 5級合格まで。文字・発音・文法・単語・クイズをこの1ファイルで。</div>
+    <nav id="nav"></nav>
+  </div>
+</header>
+<main id="main"></main>
+
+<script>
+/* ============================================================
+   データ定義
+   ============================================================ */
+
+// --- 母音 ---
+const VOWELS_BASIC = [
+  ["ㅏ","a","ア"],["ㅑ","ya","ヤ"],["ㅓ","eo","オ(口を開く)"],["ㅕ","yeo","ヨ"],
+  ["ㅗ","o","オ(口をすぼめる)"],["ㅛ","yo","ヨ"],["ㅜ","u","ウ(唇を丸く)"],["ㅠ","yu","ユ"],
+  ["ㅡ","eu","ウ(唇を横に)"],["ㅣ","i","イ"]
+];
+const VOWELS_COMPOUND = [
+  ["ㅐ","ae","エ"],["ㅒ","yae","イェ"],["ㅔ","e","エ"],["ㅖ","ye","イェ"],
+  ["ㅘ","wa","ワ"],["ㅙ","wae","ウェ"],["ㅚ","oe","ウェ"],["ㅝ","wo","ウォ"],
+  ["ㅞ","we","ウェ"],["ㅟ","wi","ウィ"],["ㅢ","ui","ウィ/エ"]
+];
+// --- 子音 ---
+const CONSONANTS = [
+  ["ㄱ","g/k","カ行(語頭k・語中g)"],["ㄴ","n","ナ行"],["ㄷ","d/t","タ行(語頭t・語中d)"],
+  ["ㄹ","r/l","ラ行"],["ㅁ","m","マ行"],["ㅂ","b/p","パ行(語頭p・語中b)"],
+  ["ㅅ","s","サ行"],["ㅇ","-/ng","無音(初声)/ン(終声)"],["ㅈ","j","チャ行"],
+  ["ㅊ","ch","チャ行(激音)"],["ㅋ","k","カ行(激音)"],["ㅌ","t","タ行(激音)"],
+  ["ㅍ","p","パ行(激音)"],["ㅎ","h","ハ行"]
+];
+const CONSONANTS_TENSE = [
+  ["ㄲ","kk","濃音ッカ"],["ㄸ","tt","濃音ッタ"],["ㅃ","pp","濃音ッパ"],
+  ["ㅆ","ss","濃音ッサ"],["ㅉ","jj","濃音ッチャ"]
+];
+
+// --- 文法トピック(5級 基礎) ---
+const GRAMMAR = [
+  {level:"5級", title:"名詞＋です：이에요/예요",
+   form:"名詞+이에요/예요",
+   body:`名詞に付けて「〜です」。パッチム有→<span class="hl">이에요</span>、パッチム無→<span class="hl">예요</span>。疑問は語尾を上げるだけ(이에요? 예요?)。`,
+   ex:[["학생이에요.","学生です。","ハクセンイエヨ"],["의사예요.","医者です。","ウィサエヨ"],["친구예요?","友だちですか？","チングエヨ"]]},
+  {level:"5級", title:"名詞＋です(かたい)：입니다／입니까?",
+   form:"名詞+입니다 / 名詞+입니까?",
+   body:`ニュースや初対面などかしこまった丁寧形。平叙は<span class="hl">입니다</span>、疑問は<span class="hl">입니까?</span>。読みは[임니다/임니까]。`,
+   ex:[["회사원입니다.","会社員です。","フェサウォニムニダ"],["일본 사람입니까?","日本人ですか？","イルボンサラミムニッカ"]]},
+  {level:"5級", title:"存在：있다(ある/いる)・없다(ない/いない)",
+   form:"있어요 / 없어요",
+   body:`所有・存在の両方に使う。丁寧形は<span class="hl">있어요/없어요</span>、かたい形は<span class="hl">있습니다/없습니다</span>。`,
+   ex:[["시간이 있어요.","時間があります。",""],["돈이 없어요.","お金がありません。",""],["동생이 있습니다.","弟／妹がいます。",""]]},
+  {level:"5級", title:"これ・それ・あれ / ここ・そこ・あそこ",
+   form:"이것/그것/저것, 여기/거기/저기",
+   body:`<span class="hl">이</span>(この)・<span class="hl">그</span>(その)・<span class="hl">저</span>(あの)。物は<span class="hl">이것/그것/저것</span>、場所は<span class="hl">여기/거기/저기</span>。会話では이것→이거。`,
+   ex:[["이것은 뭐예요?","これは何ですか？",""],["여기가 학교예요.","ここが学校です。",""],["그 사람은 친구예요.","その人は友だちです。",""]]},
+  {level:"5級", title:"基本の助詞①：은/는・이/가・을/를",
+   form:"은/는(は), 이/가(が), 을/를(を)",
+   body:`パッチム有無で形が変わる。は=<span class="hl">은</span>(有)/<span class="hl">는</span>(無)、が=<span class="hl">이</span>(有)/<span class="hl">가</span>(無)、を=<span class="hl">을</span>(有)/<span class="hl">를</span>(無)。`,
+   ex:[["저는 일본 사람이에요.","私は日本人です。",""],["빵을 먹어요.","パンを食べます。",""],["물이 좋아요.","水がいいです。",""]]},
+  {level:"5級", title:"助詞②：에(に)・에서(で)",
+   form:"場所/時+에, 場所+에서",
+   body:`<span class="hl">에</span>=時・場所(ある/行く先)、<span class="hl">에서</span>=動作をする場所。「〜へ行く」は에、「〜で食べる」は에서。`,
+   ex:[["학교에 가요.","学校に行きます。",""],["집에 있어요.","家にいます。",""],["식당에서 먹어요.","食堂で食べます。",""]]},
+  {level:"5級", title:"助詞③：도(も)・와/과(と)・하고(と)",
+   form:"名詞+도, 名詞+와/과, 名詞+하고",
+   body:`<span class="hl">도</span>=「〜も」。「〜と」はパッチム有→<span class="hl">과</span>/無→<span class="hl">와</span>、会話では<span class="hl">하고</span>が便利。`,
+   ex:[["저도 학생이에요.","私も学生です。",""],["친구와 가요.","友だちと行きます。",""],["빵하고 우유.","パンと牛乳。",""]]},
+  {level:"5級", title:"否定：名詞＋이/가 아니에요(〜ではない)",
+   form:"名詞+이/가 아니에요",
+   body:`名詞を否定する「〜ではありません」。パッチム有→<span class="hl">이 아니에요</span>、無→<span class="hl">가 아니에요</span>。かたい形は<span class="hl">이/가 아닙니다</span>。`,
+   ex:[["학생이 아니에요.","学生ではありません。",""],["의사가 아니에요.","医者ではありません。",""]]},
+  {level:"5級", title:"否定：안＋動詞・形容詞(〜しない)",
+   form:"안 + 動詞/形容詞",
+   body:`用言の前に<span class="hl">안</span>を置くと「〜しない・〜くない」。하다動詞は<span class="hl">名詞+안 하다</span>(例:공부 안 해요)。`,
+   ex:[["안 가요.","行きません。",""],["안 비싸요.","高くありません。",""],["공부 안 해요.","勉強しません。",""]]},
+  {level:"5級", title:"ヘヨ体(現在) 아요/어요/해요",
+   form:"語幹+아요/어요, 하다→해요",
+   body:`丁寧な「〜します・〜です」。語幹末の母音が<span class="hl">ㅏ・ㅗ→아요</span>、それ以外→<span class="hl">어요</span>、<span class="hl">하다→해요</span>。会話で最重要。`,
+   ex:[["가다 → 가요","行く→行きます",""],["먹다 → 먹어요","食べる→食べます",""],["공부하다 → 공부해요","勉強する→勉強します",""]]},
+  {level:"5級", title:"疑問詞：뭐/누구/어디/언제/얼마/몇",
+   form:"뭐, 누구, 어디, 언제, 얼마, 몇",
+   body:`<span class="hl">뭐/무엇</span>(何)・<span class="hl">누구</span>(誰)・<span class="hl">어디</span>(どこ)・<span class="hl">언제</span>(いつ)・<span class="hl">얼마</span>(いくら)・<span class="hl">몇</span>(いくつ)。`,
+   ex:[["이거 뭐예요?","これ何ですか？",""],["어디에 가요?","どこに行きますか？",""],["얼마예요?","いくらですか？",""]]},
+  {level:"5級", title:"数：漢数詞と固有数詞",
+   form:"漢数詞:일이삼… / 固有数詞:하나둘셋…",
+   body:`値段・電話番号・分・年月日→<span class="hl">漢数詞</span>。個数・人数・歳・時→<span class="hl">固有数詞</span>。固有数は名詞の前で形が変化(하나→한 개, 둘→두 명)。`,
+   ex:[["삼천 원이에요.","3000ウォンです。",""],["사과 두 개.","りんご2個。",""],["스무 살이에요.","20歳です。",""]]},
+  {level:"5級", title:"時間の言い方：〜시 〜분",
+   form:"固有数+시(時) / 漢数+분(分)",
+   body:`「時」は固有数詞＋<span class="hl">시</span>、「分」は漢数詞＋<span class="hl">분</span>。1時=한 시、2時=두 시、3時=세 시。半は<span class="hl">반</span>。`,
+   ex:[["지금 세 시예요.","今3時です。",""],["열 시 삼십 분.","10時30分。",""],["한 시 반.","1時半。",""]]},
+];
+
+// --- 単語(4級 頻出コア語彙 / カテゴリ別) ---
+const VOCAB = [
+  // あいさつ・表現
+  ["안녕하세요","こんにちは","あいさつ"],["안녕히 가세요","さようなら(去る人へ)","あいさつ"],
+  ["감사합니다","ありがとうございます","あいさつ"],["미안해요","ごめんなさい","あいさつ"],
+  ["괜찮아요","大丈夫です","あいさつ"],["실례합니다","失礼します","あいさつ"],
+  ["처음 뵙겠습니다","はじめまして","あいさつ"],["잘 부탁합니다","よろしくお願いします","あいさつ"],
+  // 動詞
+  ["가다","行く","動詞"],["오다","来る","動詞"],["먹다","食べる","動詞"],["마시다","飲む","動詞"],
+  ["보다","見る","動詞"],["듣다","聞く","動詞"],["읽다","読む","動詞"],["쓰다","書く/使う","動詞"],
+  ["사다","買う","動詞"],["팔다","売る","動詞"],["만나다","会う","動詞"],["기다리다","待つ","動詞"],
+  ["자다","寝る","動詞"],["일어나다","起きる","動詞"],["살다","住む/暮らす","動詞"],["죽다","死ぬ","動詞"],
+  ["공부하다","勉強する","動詞"],["일하다","働く","動詞"],["운동하다","運動する","動詞"],["요리하다","料理する","動詞"],
+  ["가르치다","教える","動詞"],["배우다","習う","動詞"],["알다","知る/わかる","動詞"],["모르다","知らない","動詞"],
+  ["좋아하다","好む","動詞"],["싫어하다","嫌う","動詞"],["시작하다","始める","動詞"],["끝나다","終わる","動詞"],
+  ["웃다","笑う","動詞"],["울다","泣く","動詞"],["걷다","歩く","動詞"],["뛰다","走る","動詞"],
+  ["타다","乗る","動詞"],["내리다","降りる/降る","動詞"],["보내다","送る/過ごす","動詞"],["받다","受け取る","動詞"],
+  // 形容詞
+  ["좋다","良い","形容詞"],["나쁘다","悪い","形容詞"],["크다","大きい","形容詞"],["작다","小さい","形容詞"],
+  ["많다","多い","形容詞"],["적다","少ない","形容詞"],["비싸다","(値段が)高い","形容詞"],["싸다","安い","形容詞"],
+  ["맛있다","おいしい","形容詞"],["맛없다","まずい","形容詞"],["예쁘다","きれい/かわいい","形容詞"],["멋있다","かっこいい","形容詞"],
+  ["덥다","暑い","形容詞"],["춥다","寒い","形容詞"],["따뜻하다","暖かい","形容詞"],["시원하다","涼しい/すっきり","形容詞"],
+  ["쉽다","易しい","形容詞"],["어렵다","難しい","形容詞"],["바쁘다","忙しい","形容詞"],["아프다","痛い/具合が悪い","形容詞"],
+  ["재미있다","面白い","形容詞"],["재미없다","つまらない","形容詞"],["빠르다","速い","形容詞"],["느리다","遅い","形容詞"],
+  ["높다","高い(高さ)","形容詞"],["낮다","低い","形容詞"],["길다","長い","形容詞"],["짧다","短い","形容詞"],
+  // 人・家族
+  ["사람","人","人・家族"],["친구","友だち","人・家族"],["가족","家族","人・家族"],["부모님","両親","人・家族"],
+  ["아버지","お父さん","人・家族"],["어머니","お母さん","人・家族"],["형","兄(男から)","人・家族"],["오빠","兄(女から)","人・家族"],
+  ["누나","姉(男から)","人・家族"],["언니","姉(女から)","人・家族"],["동생","弟・妹","人・家族"],["아이","子ども","人・家族"],
+  ["남자","男","人・家族"],["여자","女","人・家族"],["선생님","先生","人・家族"],["학생","学生","人・家族"],
+  // 場所
+  ["집","家","場所"],["학교","学校","場所"],["회사","会社","場所"],["병원","病院","場所"],
+  ["은행","銀行","場所"],["가게","店","場所"],["시장","市場","場所"],["백화점","デパート","場所"],
+  ["식당","食堂","場所"],["카페","カフェ","場所"],["역","駅","場所"],["공항","空港","場所"],
+  ["도서관","図書館","場所"],["공원","公園","場所"],["화장실","トイレ","場所"],["나라","国","場所"],
+  // 時間
+  ["오늘","今日","時間"],["어제","昨日","時間"],["내일","明日","時間"],["지금","今","時間"],
+  ["아침","朝/朝食","時間"],["점심","昼/昼食","時間"],["저녁","夕方/夕食","時間"],["밤","夜","時間"],
+  ["시간","時間","時間"],["요일","曜日","時間"],["주말","週末","時間"],["매일","毎日","時間"],
+  ["봄","春","時間"],["여름","夏","時間"],["가을","秋","時間"],["겨울","冬","時間"],
+  // 食べ物
+  ["밥","ご飯","食べ物"],["물","水","食べ物"],["빵","パン","食べ物"],["고기","肉","食べ物"],
+  ["생선","魚","食べ物"],["과일","果物","食べ物"],["채소","野菜","食べ物"],["커피","コーヒー","食べ物"],
+  ["우유","牛乳","食べ物"],["술","お酒","食べ物"],["김치","キムチ","食べ物"],["라면","ラーメン","食べ物"],
+  // もの・体
+  ["책","本","もの・体"],["가방","かばん","もの・体"],["돈","お金","もの・体"],["시계","時計","もの・体"],
+  ["옷","服","もの・体"],["신발","靴","もの・体"],["우산","傘","もの・体"],["전화","電話","もの・体"],
+  ["컴퓨터","パソコン","もの・体"],["자동차","車","もの・体"],["손","手","もの・体"],["발","足","もの・体"],
+  ["눈","目/雪","もの・体"],["코","鼻","もの・体"],["입","口","もの・体"],["머리","頭/髪","もの・体"],
+  // 副詞・その他
+  ["아주","とても","副詞など"],["너무","〜すぎる/とても","副詞など"],["많이","たくさん","副詞など"],["조금","少し","副詞など"],
+  ["빨리","早く","副詞など"],["천천히","ゆっくり","副詞など"],["같이","一緒に","副詞など"],["혼자","一人で","副詞など"],
+  ["다시","もう一度","副詞など"],["항상","いつも","副詞など"],["가끔","時々","副詞など"],["먼저","先に","副詞など"],
+  ["정말","本当に","副詞など"],["제일","一番","副詞など"],["더","もっと","副詞など"],["왜","なぜ","副詞など"],
+];
+
+// vocab.js の拡張語彙をマージ（重複は除外）
+if(window.VOCAB_EXT){
+  const seen=new Set(VOCAB.map(v=>v[0]));
+  window.VOCAB_EXT.forEach(v=>{ if(v[0]&&!seen.has(v[0])){VOCAB.push(v);seen.add(v[0]);} });
+}
+
+/* ============================================================
+   進捗ストレージ
+   ============================================================ */
+const store={
+  get(k,d){try{return JSON.parse(localStorage.getItem("h4_"+k))??d}catch(e){return d}},
+  set(k,v){localStorage.setItem("h4_"+k,JSON.stringify(v))}
+};
+
+/* ============================================================
+   音声読み上げ (Web Speech API / 韓国語)
+   ============================================================ */
+let _koVoice=null, _ttsReady=false;
+function loadVoices(){
+  if(!('speechSynthesis' in window))return;
+  const vs=speechSynthesis.getVoices();
+  _koVoice=vs.find(v=>v.lang&&v.lang.toLowerCase().startsWith('ko'))||null;
+  _ttsReady=vs.length>0;
+}
+if('speechSynthesis' in window){
+  loadVoices();
+  speechSynthesis.onvoiceschanged=loadVoices;
+}
+function speak(text,ev){
+  if(ev){ev.stopPropagation();}
+  if(!('speechSynthesis' in window)){
+    alert('お使いのブラウザは音声読み上げに対応していません。Chrome / Edge / Safari をお試しください。');return;
+  }
+  loadVoices();
+  speechSynthesis.cancel();
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='ko-KR'; u.rate=0.85; u.pitch=1;
+  if(_koVoice)u.voice=_koVoice;
+  speechSynthesis.speak(u);
+}
+// 韓国語ハングルだけ抽出して読み上げ（例文の日本語やタグを除く）
+function speakKo(text,ev){
+  const ko=(text.match(/[가-힣0-9\s.,?!]+/g)||[text]).join(' ').trim();
+  speak(ko||text,ev);
+}
+
+/* ============================================================
+   画面構築
+   ============================================================ */
+const TABS=[
+  {id:"home",label:"🏠 学習ガイド"},
+  {id:"letters",label:"㉠ 文字"},
+  {id:"pron",label:"🔊 発音"},
+  {id:"grammar",label:"📘 文法"},
+  {id:"vocab",label:"🗂 単語帳"},
+  {id:"quiz",label:"✏️ クイズ"},
+  {id:"exam",label:"📝 模擬試験"},
+];
+const nav=document.getElementById("nav");
+const main=document.getElementById("main");
+TABS.forEach(t=>{
+  const b=document.createElement("button");
+  b.textContent=t.label; b.dataset.id=t.id;
+  b.onclick=()=>show(t.id);
+  nav.appendChild(b);
+  const v=document.createElement("section");
+  v.className="view"; v.id="view-"+t.id;
+  main.appendChild(v);
+});
+function show(id){
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.id===id));
+  document.querySelectorAll(".view").forEach(v=>v.classList.toggle("active",v.id==="view-"+id));
+  window.scrollTo({top:0,behavior:"smooth"});
+  store.set("lastTab",id);
+}
+
+/* ---------- 学習ガイド ---------- */
+function buildHome(){
+  const el=document.getElementById("view-home");
+  el.innerHTML=`
+  <h2>学習ガイド <span class="badge">START</span></h2>
+  <p class="lead">ハングル能力検定5級は、いちばんやさしい入門レベル。<b>ハングルが読めること</b>と、基本のあいさつ・約480語の語彙・やさしい文（現在形）が中心です。合格ラインは<b>100点満点中60点前後</b>（聞きとり40点＋筆記60点）。まずは下の順番で進めましょう。</p>
+
+  <div class="card">
+    <h3 style="margin-top:4px">✅ 5級で問われること</h3>
+    <ul class="clean">
+      <li><b>文字</b>：ハングル（母音・子音・パッチム）を正しく読める・書けること（最重要）</li>
+      <li><b>発音</b>：パッチムの音と、連音化などの基本の読み方</li>
+      <li><b>文法</b>：이에요/예요・입니다、있다/없다、基本の助詞、否定(안)、ヘヨ体(現在)、数詞</li>
+      <li><b>語彙</b>：約480語（身近な名詞・基本動詞・形容詞・あいさつ・数）</li>
+      <li><b>聞きとり</b>：短い文・単語の聞き取り（🔊音声読み上げ対応。単語帳・文法・模擬試験で耳から練習）</li>
+    </ul>
+  </div>
+
+  <h3>📅 おすすめ学習ステップ（目安8〜12週）</h3>
+  <ul class="checklist" id="steps"></ul>
+
+  <div class="note">💡 <b>使い方</b>：チェックは自動保存されます。毎日「文字→単語10語→文法1つ→クイズ5問」を回すのが最短ルート。聞きとり対策は、覚えた単語を声に出して読む「音読」が効果的です。</div>
+
+  <h3>🎯 進捗</h3>
+  <div class="kpi" id="homeKpi"></div>
+  `;
+  const steps=[
+    "STEP1：ハングルの母音（10）を読めるようにする（「文字」タブ）",
+    "STEP2：子音（14）＋濃音を覚え、文字を組み合わせて読む練習",
+    "STEP3：パッチムの音と連音化など基本の読み方を知る（「発音」タブ）",
+    "STEP4：単語帳を「あいさつ→数→家族→食べ物→場所」の順で回す（「単語帳」タブ）",
+    "STEP5：이에요/예요・있다/없다・基本の助詞をマスター（「文法」タブ）",
+    "STEP6：ヘヨ体(現在)と否定(안)、数詞・時間の言い方に慣れる",
+    "STEP7：クイズを全カテゴリ80%以上に。間違えた語だけ復習する",
+    "STEP8：模擬試験を時間を計って解く（60点＋を安定させる）",
+  ];
+  const done=store.get("steps",[]);
+  const ul=el.querySelector("#steps");
+  steps.forEach((s,i)=>{
+    const li=document.createElement("li");
+    li.innerHTML=`<input type="checkbox" ${done.includes(i)?"checked":""}><span>${s}</span>`;
+    li.querySelector("input").onchange=e=>{
+      let d=store.get("steps",[]);
+      if(e.target.checked){if(!d.includes(i))d.push(i)} else {d=d.filter(x=>x!==i)}
+      store.set("steps",d); renderHomeKpi();
+    };
+    ul.appendChild(li);
+  });
+  renderHomeKpi();
+}
+function renderHomeKpi(){
+  const box=document.getElementById("homeKpi"); if(!box)return;
+  const stepsDone=store.get("steps",[]).length;
+  const known=store.get("known",[]).length;
+  const best=store.get("quizBest",{});
+  const avg=Object.values(best).length?Math.round(Object.values(best).reduce((a,b)=>a+b,0)/Object.values(best).length):0;
+  box.innerHTML=`
+   <div><div class="n">${stepsDone}/8</div><div class="l">ステップ達成</div></div>
+   <div><div class="n">${known}/${VOCAB.length}</div><div class="l">覚えた単語</div></div>
+   <div><div class="n">${avg}%</div><div class="l">クイズ平均(最高)</div></div>`;
+}
+
+/* ---------- 文字 ---------- */
+function letterTable(title,arr,cls){
+  let rows="";
+  arr.forEach(([k,r,j])=>{
+    rows+=`<td class="cell" onclick="this.querySelector('.rd2').style.display='block'">
+      <div class="ko">${k}</div><div class="rd">${r}</div>
+      <div class="rd2" style="display:none;color:#8fe;font-size:11px">${j}</div></td>`;
+  });
+  // wrap into rows of 5
+  let cells=arr.map(([k,r,j])=>`<td class="cell" onclick="tapCell(this)"><div class="ko">${k}</div><div class="rd">${r}</div><div class="rd2" data-j="${j}"></div></td>`);
+  let html=`<h3>${title}</h3><table><tbody><tr>`;
+  cells.forEach((c,i)=>{ html+=c; if((i+1)%5===0)html+="</tr><tr>"; });
+  html+="</tr></tbody></table>";
+  return html;
+}
+function tapCell(td){
+  const ko=td.querySelector(".ko");
+  if(ko)speakKo(ko.textContent);
+  const box=td.querySelector(".rd2");
+  if(box.textContent){box.textContent="";box.style.color="";}
+  else{box.textContent=box.dataset.j;box.style.color="#7ef2c9";box.style.fontSize="11px";box.style.marginTop="3px";}
+}
+function buildLetters(){
+  const el=document.getElementById("view-letters");
+  el.innerHTML=`
+  <h2>ハングルの文字 <span class="badge">STEP1</span></h2>
+  <p class="lead">ハングルは「子音＋母音（＋パッチム）」を組み合わせた文字。まず母音と子音の音を覚えれば、たいていの字は読めます。<b>マスをタップ</b>すると🔊音声が流れ、日本語の読みの目安が出ます。</p>
+  <div class="card">
+    <div class="note">📐 <b>組み立て方</b>：初声(子音)＋中声(母音)。例：ㄱ+ㅏ=<span class="kbig">가</span>(カ)、ㅁ+ㅜ=<span class="kbig">무</span>(ム)、ㅎ+ㅏ+ㄴ=<span class="kbig">한</span>(ハン)。母音が縦長(ㅏㅣ)なら右、横長(ㅗㅜ)なら下に置く。</div>
+    ${letterTable("基本母音（10）",VOWELS_BASIC)}
+    ${letterTable("合成母音（11）",VOWELS_COMPOUND)}
+    ${letterTable("基本子音（14）",CONSONANTS)}
+    ${letterTable("濃音（5）",CONSONANTS_TENSE)}
+  </div>
+  <div class="note">🖊 覚え方のコツ：<b>ㅏ↔ㅑ / ㅓ↔ㅕ / ㅗ↔ㅛ / ㅜ↔ㅠ</b> は「棒が1本増えるとy(ヤ行)が付く」。子音は<b>平音(ㄱㄷㅂㅈ)→激音(ㅋㅌㅍㅊ)→濃音(ㄲㄸㅃㅉ)</b>の3セットで整理すると速い。</div>
+  `;
+}
+
+/* ---------- 発音 ---------- */
+function buildPron(){
+  const el=document.getElementById("view-pron");
+  const rules=[
+    ["パッチム(終声)は7つの音","つづりは多くてもパッチムの発音は ㄱ/ㄴ/ㄷ/ㄹ/ㅁ/ㅂ/ㅇ の7音に集約される。",
+      [["옷 → [옫]","服(ㅅパッチムはㄷの音)"],["부엌 → [부억]","台所(ㅋ→ㄱ)"],["앞 → [압]","前(ㅍ→ㅂ)"]]],
+    ["連音化(リエゾン)","パッチムの次に母音(ㅇ)が来ると、パッチムが次の音に移って読まれる。最重要ルール。",
+      [["한국어 → [한구거]","韓国語"],["음악 → [으막]","音楽"],["옷이 → [오시]","服が"]]],
+    ["濃音化","ㄱ/ㄷ/ㅂの音のパッチムの後の平音(ㄱㄷㅂㅅㅈ)は濃音になる。",
+      [["학교 → [학꾜]","学校"],["식당 → [식땅]","食堂"],["숟가락 → [숟까락]","スプーン"]]],
+    ["鼻音化","ㄱ/ㄷ/ㅂの音のパッチムの後にㄴ/ㅁが来ると、パッチムがㅇ/ㄴ/ㅁに変わる。",
+      [["학년 → [항년]","学年"],["입니다 → [임니다]","です"],["옛날 → [옌날]","昔"]]],
+    ["ㅎの弱化・激音化","ㅎは母音間で弱まる。ㄱ/ㄷ/ㅂ/ㅈ＋ㅎ(逆も)は激音になる。",
+      [["좋아요 → [조아요]","良いです"],["축하 → [추카]","祝い(ㄱ+ㅎ→ㅋ)"],["못해요 → [모태요]","できません"]]],
+    ["ㄴの流音化(ㄹ化)","ㄴとㄹが隣り合うと、ㄴがㄹの音になる。",
+      [["신라 → [실라]","新羅"],["연락 → [열락]","連絡"],["편리 → [펼리]","便利"]]],
+    ["口蓋音化","ㄷ/ㅌパッチム＋이/히 は ㅈ/ㅊの音になる。",
+      [["같이 → [가치]","一緒に"],["굳이 → [구지]","あえて"],["해돋이 → [해도지]","日の出"]]],
+  ];
+  let cards=rules.map(([t,d,ex])=>{
+    let exs=ex.map(([k,j])=>`<div class="ex"><span class="k">${k}</span> <span class="j">${j}</span></div>`).join("");
+    return `<div class="card"><h3 style="margin-top:2px">${t}</h3><p style="margin:4px 0 8px">${d}</p>${exs}</div>`;
+  }).join("");
+  el.innerHTML=`
+  <h2>発音ルール <span class="badge">STEP2</span></h2>
+  <p class="lead">5級ではまず「つづり通りに読めること」が大切。その上で、よく出る<b>連音化</b>と<b>パッチムの音</b>を知っておくと聞き取りにも役立ちます（濃音化・鼻音化は余裕があればでOK）。[  ]は実際の発音。</p>
+  ${cards}
+  <div class="note">🔊 <b>聞きとり対策</b>：発音変化を知っていると聞き取れる語が一気に増えます。単語を覚えるとき、必ず[実際の音]で口に出しましょう。</div>`;
+}
+
+/* ---------- 文法 ---------- */
+function buildGrammar(){
+  const el=document.getElementById("view-grammar");
+  el.innerHTML=`
+  <h2>文法 <span class="badge">STEP5-6</span></h2>
+  <p class="lead">タイトルをタップで開閉。5級の基本文型を上から順に見ていきましょう。「이에요/예요」と「助詞」「数」が特に大切です。</p>
+  <div class="toolbar">
+    <button class="btn" onclick="toggleAllG(true)">全部開く</button>
+    <button class="btn" onclick="toggleAllG(false)">全部閉じる</button>
+  </div>
+  <div id="gList"></div>`;
+  renderGrammar("all");
+}
+function renderGrammar(f){
+  const list=document.getElementById("gList");
+  list.innerHTML="";
+  GRAMMAR.filter(g=>f==="all"||g.level===f).forEach(g=>{
+    const exs=g.ex.map(([k,j,r])=>`<div class="ex"><div class="k"><button class="spk" onclick="speakKo('${k.replace(/'/g,"\\'")}',event)" title="読み上げ">🔊</button> ${k}</div><div class="j">${j}</div>${r?`<div class="r">${r}</div>`:""}</div>`).join("");
+    const d=document.createElement("div");
+    d.className="gtopic";
+    d.innerHTML=`
+      <div class="ghead" onclick="this.parentElement.classList.toggle('open')">
+        <div><span class="tag">${g.level}</span><span class="gtitle">${g.title}</span></div>
+        <span class="arrow">▶</span>
+      </div>
+      <div class="gbody">
+        <div class="gform">${g.form}</div>
+        <p style="margin:8px 0">${g.body}</p>
+        ${exs}
+      </div>`;
+    list.appendChild(d);
+  });
+}
+function filterG(f,e){renderGrammar(f);}
+function toggleAllG(open){document.querySelectorAll(".gtopic").forEach(t=>t.classList.toggle("open",open));}
+
+/* ---------- 単語帳 ---------- */
+let vcat="すべて", vlist=[], vidx=0;
+function buildVocab(){
+  const el=document.getElementById("view-vocab");
+  const cats=["すべて",...new Set(VOCAB.map(v=>v[2]))];
+  el.innerHTML=`
+  <h2>単語帳 <span class="badge">STEP4</span></h2>
+  <p class="lead">カードをタップで意味を表示。「覚えた」を押すと進捗に記録され、以降のクイズ復習に使えます（自動保存）。全${VOCAB.length}語のコア語彙。</p>
+  <div class="toolbar">
+    <label style="color:var(--muted);font-size:13px">分野</label>
+    <select id="vcat">${cats.map(c=>`<option>${c}</option>`).join("")}</select>
+    <button class="btn" onclick="startVocab(true)">🔀 シャッフル</button>
+    <label style="color:var(--muted);font-size:13px;margin-left:6px"><input type="checkbox" id="onlyUnknown"> 未習だけ</label>
+  </div>
+  <div class="progressbar"><i id="vbar"></i></div>
+  <div class="flash" id="flash">
+    <div class="flinner">
+      <div class="fface ffront"><div class="fko" id="fko">가다</div><div class="from" id="from">タップで意味</div><button class="spk big" id="fspk" onclick="speakKo(document.getElementById('fko').textContent,event)" title="読み上げ">🔊 発音を聞く</button></div>
+      <div class="fface fback"><div class="fja" id="fja"></div><div class="fcat" id="fcat"></div></div>
+    </div>
+  </div>
+  <div class="counter" id="vcount"></div>
+  <div class="toolbar" style="justify-content:center">
+    <button class="btn" onclick="prevCard()">◀ 前</button>
+    <button class="btn bad" onclick="markCard(false)">まだ</button>
+    <button class="btn good" onclick="markCard(true)">覚えた ✓</button>
+    <button class="btn" onclick="nextCard()">次 ▶</button>
+  </div>
+  <div class="note">👀 表面はハングル、裏は意味。まず「見て意味が言える」→次に「意味からハングルが書ける」を目標に。</div>
+  `;
+  document.getElementById("vcat").onchange=()=>startVocab(false);
+  document.getElementById("onlyUnknown").onchange=()=>startVocab(false);
+  document.getElementById("flash").onclick=()=>{
+    document.getElementById("flash").classList.toggle("flipped");
+  };
+  startVocab(false);
+}
+function startVocab(shuffle){
+  const cat=document.getElementById("vcat").value;
+  const onlyU=document.getElementById("onlyUnknown").checked;
+  const known=store.get("known",[]);
+  vlist=VOCAB.filter(v=>(cat==="すべて"||v[2]===cat)&&(!onlyU||!known.includes(v[0])));
+  if(shuffle)vlist=vlist.sort(()=>Math.random()-.5);
+  if(vlist.length===0)vlist=[["🎉","全部覚えました！","おめでとう"]];
+  vidx=0; renderCard();
+}
+function renderCard(){
+  const v=vlist[vidx];
+  document.getElementById("flash").classList.remove("flipped");
+  document.getElementById("fko").textContent=v[0];
+  document.getElementById("fja").textContent=v[1];
+  document.getElementById("fcat").textContent=v[2];
+  const known=store.get("known",[]);
+  document.getElementById("from").textContent=known.includes(v[0])?"✓ 覚えた（タップで意味）":"タップで意味";
+  document.getElementById("vcount").textContent=`${vidx+1} / ${vlist.length}`;
+  document.getElementById("vbar").style.width=((vidx+1)/vlist.length*100)+"%";
+}
+function nextCard(){vidx=(vidx+1)%vlist.length;renderCard();}
+function prevCard(){vidx=(vidx-1+vlist.length)%vlist.length;renderCard();}
+function markCard(k){
+  const v=vlist[vidx]; let known=store.get("known",[]);
+  if(k){if(!known.includes(v[0]))known.push(v[0]);}else{known=known.filter(x=>x!==v[0]);}
+  store.set("known",known); renderHomeKpi();
+  nextCard();
+}
+
+/* ---------- クイズ ---------- */
+let quiz={cat:null,items:[],i:0,correct:0,answered:false};
+function buildQuiz(){
+  const el=document.getElementById("view-quiz");
+  el.innerHTML=`
+  <h2>クイズ <span class="badge">STEP7</span></h2>
+  <p class="lead">分野を選んで10問。採点され、最高スコアが保存されます。まず全分野80%を目標に。</p>
+  <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))" id="quizMenu"></div>
+  <div id="quizArea"></div>`;
+  const menu=el.querySelector("#quizMenu");
+  const best=store.get("quizBest",{});
+  const cats=[
+    ["letters","㉠ 文字の読み"],["vocab_jp","🗂 単語→意味"],["vocab_ko","🗂 意味→単語"],
+    ["grammar","📘 文法穴埋め"],["pron","🔊 発音変化"],["mix","🎲 総合ミックス"]
+  ];
+  cats.forEach(([id,label])=>{
+    const b=document.createElement("button");
+    b.className="btn"; b.style.padding="16px"; b.style.textAlign="center";
+    b.innerHTML=`<div style="font-weight:700;font-size:15px">${label}</div><div style="color:var(--muted);font-size:12px;margin-top:4px">最高 ${best[id]??"-"}${best[id]!=null?"%":""}</div>`;
+    b.onclick=()=>startQuiz(id);
+    menu.appendChild(b);
+  });
+}
+function shuffle(a){return a.slice().sort(()=>Math.random()-.5);}
+function pick(arr,n,exclude){
+  const pool=arr.filter(x=>x!==exclude);
+  return shuffle(pool).slice(0,n);
+}
+// 問題生成
+function genLetters(){
+  const all=[...VOWELS_BASIC,...VOWELS_COMPOUND,...CONSONANTS,...CONSONANTS_TENSE];
+  return shuffle(all).slice(0,10).map(([k,r,j])=>{
+    const wrong=pick(all,3,null).filter(x=>x[0]!==k).slice(0,3);
+    const opts=shuffle([[j,true],...wrong.map(w=>[w[2],false])]);
+    return {q:`この文字の読みは？　<span class="big">${k}</span>`,opts};
+  });
+}
+function genVocabJP(){
+  return shuffle(VOCAB).slice(0,10).map(v=>{
+    const wrong=pick(VOCAB,3,v).map(w=>[w[1],false]);
+    const opts=shuffle([[v[1],true],...wrong]);
+    return {q:`意味は？　<span class="big">${v[0]}</span>`,opts};
+  });
+}
+function genVocabKO(){
+  return shuffle(VOCAB).slice(0,10).map(v=>{
+    const wrong=pick(VOCAB,3,v).map(w=>[w[0],false]);
+    const opts=shuffle([[v[0],true],...wrong]);
+    return {q:`「${v[1]}」を韓国語で？`,opts};
+  });
+}
+const GQ=[
+  ["학생___. (学生です・パッチム有)","〜です","이에요","예요","이예요","에요"],
+  ["친구___. (友だちです・パッチム無)","〜です","예요","이에요","여요","예에요"],
+  ["저___ 학생이에요. (私<b>は</b>・パッチム無)","は","는","은","가","를"],
+  ["밥___ 먹어요. (ご飯<b>を</b>・パッチム有)","を","을","를","이","에"],
+  ["학교___ 가요. (学校<b>に</b>行く)","に","에","에서","를","도"],
+  ["집___ 자요. (家<b>で</b>寝る)","で","에서","에","으로","도"],
+  ["시간이 ___. (時間があります)","ある","있어요","없어요","이에요","아니에요"],
+  ["학생___ 아니에요. (学生<b>ではない</b>・パッチム有)","が","이","가","은","를"],
+  ["___ 가요. (行き<b>ません</b>)","否定","안","잘","또","제일"],
+  ["먹다 の해요体は？","食べます","먹어요","먹아요","머거요","먹여요"],
+  ["가다 の해요体は？","行きます","가요","가아요","거요","가여요"],
+  ["공부하다 の해요体は？","勉強します","공부해요","공부하요","공부해여","공부햬요"],
+  ["사과 ___. (りんご2個)","固有数＋個","두 개","둘 개","이 개","두 명"],
+  ["지금 ___예요. (今3時)","固有数＋時","세 시","삼 시","셋 시","세 분"],
+  ["이거 ___예요? (いくらですか)","いくら","얼마","뭐","어디","누구"],
+  ["친구___ 가요. (友だち<b>と</b>・パッチム無)","と","와","과","도","를"],
+];
+function genGrammar(){
+  return shuffle(GQ).slice(0,10).map(row=>{
+    const [q,hint,correct,...rest]=row;
+    const wrongs=rest.slice(0,3); // 3 distractors (last element is dup of correct, ignore)
+    const opts=shuffle([[correct,true],...wrongs.slice(0,3).map(w=>[w,false])]);
+    return {q:`${q}<div style="color:var(--muted);font-size:13px;margin-top:6px">（${hint}）</div>`,opts};
+  });
+}
+const PQ=[
+  ["한국어 の実際の発音は？","[한구거]","[한국어]","[한구커]","[항구거]"],
+  ["학교 の実際の発音は？","[학꾜]","[학교]","[하교]","[항교]"],
+  ["입니다 の実際の発音は？","[임니다]","[입니다]","[인니다]","[이비다]"],
+  ["좋아요 の実際の発音は？","[조아요]","[졷아요]","[조하요]","[좋가요]"],
+  ["같이 の実際の発音は？","[가치]","[가티]","[갇이]","[가시]"],
+  ["연락 の実際の発音は？","[열락]","[연낙]","[연락]","[열낙]"],
+  ["옷이 の実際の発音は？","[오시]","[옫이]","[오디]","[옷이]"],
+  ["축하 の実際の発音は？","[추카]","[추가]","[축하]","[추하]"],
+  ["식당 の実際の発音は？","[식땅]","[식당]","[싣당]","[신땅]"],
+  ["음악 の実際の発音は？","[으막]","[음악]","[음막]","[으악]"],
+];
+function genPron(){
+  return shuffle(PQ).slice(0,10).map(row=>{
+    const [q,correct,...wrong]=row;
+    const opts=shuffle([[correct,true],...wrong.map(w=>[w,false])]);
+    return {q:`<span class="big" style="font-size:24px">${q.split(" ")[0]}</span><div style="margin-top:6px">実際の発音は？</div>`,opts};
+  });
+}
+function genMix(){
+  return shuffle([...genLetters(),...genVocabJP(),...genGrammar(),...genPron()]).slice(0,10);
+}
+function startQuiz(cat){
+  const gen={letters:genLetters,vocab_jp:genVocabJP,vocab_ko:genVocabKO,grammar:genGrammar,pron:genPron,mix:genMix}[cat];
+  quiz={cat,items:gen(),i:0,correct:0,answered:false};
+  renderQuiz();
+}
+function renderQuiz(){
+  const area=document.getElementById("quizArea");
+  if(quiz.i>=quiz.items.length){return finishQuiz();}
+  const it=quiz.items[quiz.i];
+  area.innerHTML=`
+  <div class="qbox">
+    <div class="qmeta"><span>第 ${quiz.i+1} / ${quiz.items.length} 問</span><span>正解 ${quiz.correct}</span></div>
+    <div class="qq">${it.q}</div>
+    <div id="opts"></div>
+    <div id="next" style="text-align:right;margin-top:10px;display:none">
+      <button class="btn primary" onclick="quiz.i++;quiz.answered=false;renderQuiz()">次へ ▶</button>
+    </div>
+  </div>`;
+  const opts=document.getElementById("opts");
+  it.opts.forEach(([text,ok])=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.innerHTML=text;
+    b.onclick=()=>answer(b,ok,it);
+    opts.appendChild(b);
+  });
+  window.scrollTo({top:9999,behavior:"smooth"});
+}
+function answer(btn,ok,it){
+  if(quiz.answered)return; quiz.answered=true;
+  const opts=document.getElementById("opts");
+  [...opts.children].forEach(b=>{
+    b.classList.add("disabled");
+    const isCorrect=it.opts.find(o=>o[0]===b.innerHTML||o[0]===b.textContent);
+  });
+  // mark
+  [...opts.children].forEach(b=>{
+    const o=it.opts.find(o=>o[0]===b.innerHTML);
+    if(o&&o[1])b.classList.add("correct");
+  });
+  if(ok){btn.classList.add("correct");quiz.correct++;}
+  else{btn.classList.add("wrong");}
+  document.getElementById("next").style.display="block";
+}
+function finishQuiz(){
+  const area=document.getElementById("quizArea");
+  const pct=Math.round(quiz.correct/quiz.items.length*100);
+  const best=store.get("quizBest",{});
+  const isNew=best[quiz.cat]==null||pct>best[quiz.cat];
+  if(isNew){best[quiz.cat]=pct;store.set("quizBest",best);}
+  renderHomeKpi();
+  const msg=pct>=80?"合格圏！この分野はバッチリ 🎉":pct>=60?"あと一歩。間違えた所を復習しよう 💪":"復習してもう一度チャレンジ 📖";
+  area.innerHTML=`
+  <div class="qbox result">
+    <div class="score" style="color:${pct>=80?'var(--good)':pct>=60?'var(--warn)':'var(--bad)'}">${pct}%</div>
+    <div style="font-size:15px;margin:6px 0">${quiz.correct} / ${quiz.items.length} 問正解</div>
+    <div style="color:var(--muted)">${msg}${isNew?'　<b style="color:var(--accent2)">自己ベスト更新！</b>':''}</div>
+    <div class="toolbar" style="justify-content:center;margin-top:18px">
+      <button class="btn primary" onclick="startQuiz('${quiz.cat}')">もう一度</button>
+      <button class="btn" onclick="document.getElementById('quizArea').innerHTML='';window.scrollTo({top:0,behavior:'smooth'})">分野を選ぶ</button>
+    </div>
+  </div>`;
+}
+
+/* ---------- 模擬試験 ---------- */
+// 聞きとり(TTSで読み上げ) : 各4点
+const EXAM_LISTEN=[
+  {audio:"안녕하세요",q:"意味は？",opts:[["こんにちは",true],["さようなら",false],["ありがとう",false],["ごめんなさい",false]]},
+  {audio:"감사합니다",q:"意味は？",opts:[["ありがとうございます",true],["すみません",false],["はじめまして",false],["いらっしゃいませ",false]]},
+  {audio:"이거 얼마예요?",q:"何を尋ねていますか？",opts:[["値段",true],["時間",false],["場所",false],["名前",false]]},
+  {audio:"삼천 원이에요",q:"いくらですか？",opts:[["3,000ウォン",true],["300ウォン",false],["13,000ウォン",false],["3,500ウォン",false]]},
+  {audio:"저는 학생이에요",q:"意味は？",opts:[["私は学生です",true],["私は先生です",false],["私は会社員です",false],["私は医者です",false]]},
+  {audio:"화장실이 어디예요?",q:"何を尋ねていますか？",opts:[["トイレの場所",true],["トイレの数",false],["値段",false],["時間",false]]},
+  {audio:"물 주세요",q:"意味は？",opts:[["水をください",true],["水が好きです",false],["水はいくらですか",false],["水を飲みました",false]]},
+  {audio:"지금 몇 시예요?",q:"適切な答えは？",opts:[["세 시예요",true],["세 개예요",false],["세 명이에요",false],["삼천 원이에요",false]]},
+  {audio:"가족이 몇 명이에요?",q:"何を尋ねていますか？",opts:[["家族の人数",true],["家族の名前",false],["年齢",false],["住所",false]]},
+  {audio:"이름이 뭐예요?",q:"何を尋ねていますか？",opts:[["名前",true],["年齢",false],["場所",false],["値段",false]]},
+  {audio:"친구가 있어요?",q:"適切な答えは？",opts:[["네, 있어요",true],["네, 없어요",false],["세 개예요",false],["여기예요",false]]},
+  {audio:"안녕히 가세요",q:"意味は？",opts:[["さようなら（去る人へ）",true],["こんにちは",false],["いらっしゃいませ",false],["おやすみなさい",false]]},
+];
+// 筆記 : 各4点
+const EXAM_WRITE=[
+  {q:'発音問題：<b>학교</b> の実際の発音は？',opts:[["[학꾜]",true],["[학교]",false],["[하교]",false],["[항교]",false]]},
+  {q:'発音問題：<b>한국어</b> の実際の発音は？',opts:[["[한구거]",true],["[한국어]",false],["[항구거]",false],["[한구커]",false]]},
+  {q:'助詞：학교___ 가요.（学校<b>に</b>行きます）',opts:[["에",true],["에서",false],["를",false],["도",false]]},
+  {q:'助詞：밥___ 먹어요.（ご飯<b>を</b>食べます・パッチム有）',opts:[["을",true],["를",false],["이",false],["에",false]]},
+  {q:'助詞：저___ 학생이에요.（私<b>は</b>・パッチム無）',opts:[["는",true],["은",false],["가",false],["를",false]]},
+  {q:'〜です：학생___.（学生です・パッチム有）',opts:[["이에요",true],["예요",false],["여요",false],["에요",false]]},
+  {q:'〜です：친구___.（友だちです・パッチム無）',opts:[["예요",true],["이에요",false],["여요",false],["예에요",false]]},
+  {q:'存在：시간이 ___.（時間があります）',opts:[["있어요",true],["없어요",false],["이에요",false],["아니에요",false]]},
+  {q:'否定：___ 가요.（行きません）',opts:[["안",true],["도",false],["만",false],["또",false]]},
+  {q:'活用：먹다 の해요体は？',opts:[["먹어요",true],["먹아요",false],["머거요",false],["먹여요",false]]},
+  {q:'語彙：병원 の意味は？',opts:[["病院",true],["銀行",false],["学校",false],["市場",false]]},
+  {q:'語彙：내일 の意味は？',opts:[["明日",true],["昨日",false],["今日",false],["毎日",false]]},
+  {q:'語彙：물 の意味は？',opts:[["水",true],["牛乳",false],["お茶",false],["お酒",false]]},
+  {q:'反対語：크다（大きい）⇔',opts:[["작다",true],["많다",false],["높다",false],["길다",false]]},
+  {q:'数：「3時」を韓国語で',opts:[["세 시",true],["삼 시",false],["셋 시",false],["세 분",false]]},
+  {q:'助数詞：「りんご2個」を韓国語で',opts:[["사과 두 개",true],["사과 둘 개",false],["사과 이 개",false],["사과 두 명",false]]},
+  {q:'あいさつ：「ありがとうございます」は？',opts:[["감사합니다",true],["미안합니다",false],["안녕하세요",false],["실례합니다",false]]},
+  {q:'疑問詞：「いくら」は？',opts:[["얼마",true],["누구",false],["어디",false],["언제",false]]},
+  {q:'数字：漢数詞の「5」は？',opts:[["오",true],["사",false],["육",false],["삼",false]]},
+  {q:'曜日：「月曜日」は？',opts:[["월요일",true],["화요일",false],["일요일",false],["목요일",false]]},
+];
+let exam={items:[],i:0,answered:false,lis:0,wr:0};
+function buildExam(){
+  const el=document.getElementById("view-exam");
+  const best=store.get("examBest",null);
+  el.innerHTML=`
+  <h2>模擬試験 <span class="badge">STEP8</span></h2>
+  <p class="lead">本番形式（聞きとり10問＝40点＋筆記15問＝60点、計100点）。<b>60点以上で合格</b>。聞きとりは🔊で韓国語が読み上げられます。静かな場所で挑戦しましょう。</p>
+  <div class="card" id="examIntro">
+    <div class="kpi">
+      <div><div class="n">25問</div><div class="l">問題数</div></div>
+      <div><div class="n">100点</div><div class="l">満点</div></div>
+      <div><div class="n" style="color:var(--good)">60点</div><div class="l">合格ライン</div></div>
+      <div><div class="n">${best!=null?best+"点":"-"}</div><div class="l">自己ベスト</div></div>
+    </div>
+    <div class="note">🔊 聞きとりは音声が自動再生されます。うまく再生されない場合は「もう一度聞く」を押してください（初回はブラウザの許可が必要な場合があります）。初級のうちは「スクリプトを見る」でハングルを確認しながらでもOK。</div>
+    <div style="text-align:center;margin-top:14px">
+      <button class="btn primary" style="font-size:16px;padding:12px 28px" onclick="startExam()">▶ 模擬試験を始める</button>
+    </div>
+  </div>
+  <div id="examArea"></div>`;
+}
+function startExam(){
+  const lis=shuffle(EXAM_LISTEN).slice(0,10).map(x=>({sec:'listen',...x}));
+  const wr=shuffle(EXAM_WRITE).slice(0,15).map(x=>({sec:'write',...x}));
+  exam={items:[...lis,...wr],i:0,answered:false,lis:0,wr:0};
+  document.getElementById("examIntro").style.display="none";
+  renderExam();
+}
+function renderExam(){
+  const area=document.getElementById("examArea");
+  if(exam.i>=exam.items.length)return finishExam();
+  const it=exam.items[exam.i];
+  const isL=it.sec==='listen';
+  const secLabel=isL?`🔊 聞きとり ${exam.i+1}/10`:`✏️ 筆記 ${exam.i-9}/15`;
+  area.innerHTML=`
+  <div class="qbox">
+    <div class="qmeta"><span>${secLabel}</span><span>${exam.i+1} / ${exam.items.length}問</span></div>
+    ${isL?`
+      <div style="text-align:center;margin:6px 0 14px">
+        <button class="btn primary" onclick="speakKo('${it.audio.replace(/'/g,"\\'")}',event)">🔊 もう一度聞く</button>
+        <button class="btn" onclick="var s=document.getElementById('script');s.style.display=s.style.display==='none'?'block':'none'">スクリプトを見る</button>
+        <div id="script" style="display:none;margin-top:10px;font-size:22px;color:#cfe">${it.audio}</div>
+      </div>`:""}
+    <div class="qq">${it.q}</div>
+    <div id="eopts"></div>
+    <div id="enext" style="text-align:right;margin-top:10px;display:none">
+      <button class="btn primary" onclick="exam.i++;exam.answered=false;renderExam()">${exam.i+1>=exam.items.length?"結果を見る":"次へ ▶"}</button>
+    </div>
+  </div>`;
+  const opts=document.getElementById("eopts");
+  it.opts.forEach(([text,ok])=>{
+    const b=document.createElement("button");
+    b.className="opt"; b.innerHTML=text;
+    b.onclick=()=>answerExam(b,ok,it);
+    opts.appendChild(b);
+  });
+  if(isL)setTimeout(()=>speakKo(it.audio),350); // 自動再生
+  window.scrollTo({top:9999,behavior:"smooth"});
+}
+function answerExam(btn,ok,it){
+  if(exam.answered)return; exam.answered=true;
+  const opts=document.getElementById("eopts");
+  [...opts.children].forEach(b=>{
+    b.classList.add("disabled");
+    const o=it.opts.find(o=>o[0]===b.innerHTML);
+    if(o&&o[1])b.classList.add("correct");
+  });
+  if(ok){btn.classList.add("correct"); if(it.sec==='listen')exam.lis++;else exam.wr++;}
+  else{btn.classList.add("wrong");}
+  document.getElementById("enext").style.display="block";
+}
+function finishExam(){
+  const area=document.getElementById("examArea");
+  const lisPts=exam.lis*4, wrPts=exam.wr*4, total=lisPts+wrPts;
+  const pass=total>=60;
+  const best=store.get("examBest",null);
+  const isNew=best==null||total>best;
+  if(isNew)store.set("examBest",total);
+  renderHomeKpi();
+  area.innerHTML=`
+  <div class="qbox result">
+    <div style="font-size:20px;font-weight:700;color:${pass?'var(--good)':'var(--bad)'}">${pass?'🎉 合格ライン到達！':'📖 もう少し！'}</div>
+    <div class="score" style="color:${pass?'var(--good)':'var(--bad)'}">${total}点</div>
+    <div style="color:var(--muted);font-size:14px">合格ライン 60点 ${isNew?'　<b style="color:var(--accent2)">自己ベスト更新！</b>':''}</div>
+    <div class="kpi" style="margin-top:18px">
+      <div><div class="n">${lisPts}/40</div><div class="l">聞きとり</div></div>
+      <div><div class="n">${wrPts}/60</div><div class="l">筆記</div></div>
+      <div><div class="n">${exam.lis+exam.wr}/25</div><div class="l">正解数</div></div>
+    </div>
+    <div style="color:var(--muted);font-size:13.5px;margin-top:6px">
+      ${pass?'この調子で過去問も時間を計って解いてみましょう。':total>=48?'あと一歩。間違えた文法・単語を復習してもう一度！':'文法タブと単語帳を回してから再挑戦しましょう。'}
+    </div>
+    <div class="toolbar" style="justify-content:center;margin-top:18px">
+      <button class="btn primary" onclick="startExam()">もう一度受ける</button>
+      <button class="btn" onclick="buildExam();window.scrollTo({top:0,behavior:'smooth'})">最初の画面へ</button>
+    </div>
+  </div>`;
+}
+
+/* ============================================================
+   初期化
+   ============================================================ */
+buildHome();buildLetters();buildPron();buildGrammar();buildVocab();buildQuiz();buildExam();
+show(store.get("lastTab","home"));
+</script>
+</body>
+</html>
