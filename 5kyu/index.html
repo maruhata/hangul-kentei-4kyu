@@ -89,6 +89,7 @@
   .fback{background:linear-gradient(160deg,#123a30,#0f2a24);transform:rotateY(180deg)}
   .fko{font-size:46px;font-weight:800;color:#fff}
   .fpron{font-size:15px;color:var(--accent2);margin-top:4px;min-height:19px}
+  .fipa{font-size:16px;color:#a893ff;margin-top:3px;min-height:20px;font-family:"Noto Sans","Segoe UI",sans-serif;letter-spacing:.3px}
   .from{font-size:15px;color:var(--muted);margin-top:8px}
   .fja{font-size:26px;font-weight:700;color:#d7ffef}
   .fcat{font-size:12px;color:var(--muted);margin-top:6px}
@@ -399,6 +400,47 @@ function koPron(text){
   return text.split(/([^가-힣]+)/).map(tok=>/^[가-힣]+$/.test(tok)?kpToken(tok):tok).join('');
 }
 
+/* ---------- IPA(国際音声記号)変換 ----------
+   発音変化後のジャモ列(kpTransformPair適用後)からIPAを生成。
+   平音(ㄱㄷㅂㅈ)は母音間・共鳴音間で有声化(k→ɡ等)、
+   ㅅ/ㅆは이/y系母音の前で口蓋化(s→ɕ)。終声は不破裂([k̚][t̚][p̚])。 */
+const KP_IPA_ONSET_PLAIN={ㄱ:'k',ㄷ:'t',ㅂ:'p',ㅈ:'tɕ'};
+const KP_IPA_ONSET_VOICED={ㄱ:'ɡ',ㄷ:'d',ㅂ:'b',ㅈ:'dʑ'};
+const KP_IPA_ONSET_OTHER={ㄲ:'kʼ',ㅋ:'kʰ',ㄴ:'n',ㄸ:'tʼ',ㅌ:'tʰ',ㄹ:'ɾ',ㅁ:'m',ㅃ:'pʼ',ㅍ:'pʰ',ㅅ:'s',ㅆ:'sʼ',ㅉ:'tɕʼ',ㅊ:'tɕʰ',ㅎ:'h'};
+const KP_IPA_VOWEL={ㅏ:'a',ㅐ:'ɛ',ㅑ:'ja',ㅒ:'jɛ',ㅓ:'ʌ',ㅔ:'e',ㅕ:'jʌ',ㅖ:'je',ㅗ:'o',ㅘ:'wa',ㅙ:'wɛ',ㅚ:'we',ㅛ:'jo',ㅜ:'u',ㅝ:'wʌ',ㅞ:'we',ㅟ:'wi',ㅠ:'ju',ㅡ:'ɯ',ㅢ:'ɰi',ㅣ:'i'};
+const KP_IPA_CODA={ㄱ:'k̚',ㄴ:'n',ㄷ:'t̚',ㄹ:'l',ㅁ:'m',ㅂ:'p̚',ㅇ:'ŋ'};
+function kpSylToIPA(syl){
+  return syl.map((s,i)=>{
+    let onset;
+    if(s.ini==='ㅇ'){ onset=''; }
+    else if(KP_IPA_ONSET_PLAIN[s.ini]){
+      const prev=syl[i-1];
+      const prevVoiced=prev&&(prev.fin===''||prev.fin==='ㄴ'||prev.fin==='ㄹ'||prev.fin==='ㅁ'||prev.fin==='ㅇ');
+      onset=(i>0&&prevVoiced)?KP_IPA_ONSET_VOICED[s.ini]:KP_IPA_ONSET_PLAIN[s.ini];
+    } else {
+      onset=KP_IPA_ONSET_OTHER[s.ini]||'';
+      if((s.ini==='ㅅ'||s.ini==='ㅆ')&&/^(ㅣ|ㅑ|ㅕ|ㅛ|ㅠ|ㅖ)/.test(s.med)){ onset=(s.ini==='ㅅ')?'ɕ':'ɕʼ'; }
+    }
+    const vowel=KP_IPA_VOWEL[s.med]||'';
+    const coda=s.fin?(KP_IPA_CODA[s.fin]||''):'';
+    return onset+vowel+coda;
+  }).join('.');
+}
+function kpTokenIPA(word){
+  const syl=[...word].map(kpDecompose);
+  if(syl.some(s=>s===null))return word; // ハングル以外はそのまま
+  for(let i=0;i<syl.length;i++){
+    const next=syl[i+1]||null;
+    const nextIsFinalDa=!!next && i+1===syl.length-1 && next.ini==='ㄷ' && next.med==='ㅏ' && next.fin==='';
+    kpTransformPair(syl[i], next, nextIsFinalDa);
+  }
+  return kpSylToIPA(syl);
+}
+// 単語/短文全体のIPA表記を返す（音節間は"."区切り）
+function koIPA(text){
+  return text.split(/([^가-힣]+)/).map(tok=>/^[가-힣]+$/.test(tok)?kpTokenIPA(tok):tok).join('');
+}
+
 /* ============================================================
    画面構築
    ============================================================ */
@@ -612,7 +654,7 @@ function buildVocab(){
   <div class="progressbar"><i id="vbar"></i></div>
   <div class="flash" id="flash">
     <div class="flinner">
-      <div class="fface ffront"><div class="fko" id="fko">가다</div><div class="fpron" id="fpron"></div><div class="from" id="from">タップで意味</div><button class="spk big" id="fspk" onclick="speakKo(document.getElementById('fko').textContent,event)" title="読み上げ">🔊 発音を聞く</button></div>
+      <div class="fface ffront"><div class="fko" id="fko">가다</div><div class="fpron" id="fpron"></div><div class="fipa" id="fipa"></div><div class="from" id="from">タップで意味</div><button class="spk big" id="fspk" onclick="speakKo(document.getElementById('fko').textContent,event)" title="読み上げ">🔊 発音を聞く</button></div>
       <div class="fface fback"><div class="fja" id="fja"></div><div class="fcat" id="fcat"></div></div>
     </div>
   </div>
@@ -647,6 +689,7 @@ function renderCard(){
   document.getElementById("fko").textContent=v[0];
   const pron=koPron(v[0]);
   document.getElementById("fpron").textContent=(pron!==v[0])?("["+pron+"]"):"";
+  document.getElementById("fipa").textContent="[IPA] "+koIPA(v[0]);
   document.getElementById("fja").textContent=v[1];
   document.getElementById("fcat").textContent=v[2];
   const known=store.get("known",[]);
