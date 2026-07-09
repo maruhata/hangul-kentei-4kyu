@@ -88,6 +88,7 @@
   .ffront{background:linear-gradient(160deg,#243056,#1a2039)}
   .fback{background:linear-gradient(160deg,#123a30,#0f2a24);transform:rotateY(180deg)}
   .fko{font-size:46px;font-weight:800;color:#fff}
+  .fpron{font-size:15px;color:var(--accent2);margin-top:4px;min-height:19px}
   .from{font-size:15px;color:var(--muted);margin-top:8px}
   .fja{font-size:26px;font-weight:700;color:#d7ffef}
   .fcat{font-size:12px;color:var(--muted);margin-top:6px}
@@ -324,6 +325,81 @@ function speakKo(text,ev){
 }
 
 /* ============================================================
+   発音変化エンジン（実際の発音のハングル表記を自動計算）
+   連音化・濃音化・鼻音化・流音化・激音化(ㅎ)・ㅎ弱化・口蓋音化に対応
+   ============================================================ */
+const KP_CHO=['ㄱ','ㄲ','ㄴ','ㄷ','ㄸ','ㄹ','ㅁ','ㅂ','ㅃ','ㅅ','ㅆ','ㅇ','ㅈ','ㅉ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const KP_JUNG=['ㅏ','ㅐ','ㅑ','ㅒ','ㅓ','ㅔ','ㅕ','ㅖ','ㅗ','ㅘ','ㅙ','ㅚ','ㅛ','ㅜ','ㅝ','ㅞ','ㅟ','ㅠ','ㅡ','ㅢ','ㅣ'];
+const KP_JONG=['','ㄱ','ㄲ','ㄳ','ㄴ','ㄵ','ㄶ','ㄷ','ㄹ','ㄺ','ㄻ','ㄼ','ㄽ','ㄾ','ㄿ','ㅀ','ㅁ','ㅂ','ㅄ','ㅅ','ㅆ','ㅇ','ㅈ','ㅊ','ㅋ','ㅌ','ㅍ','ㅎ'];
+const KP_CLUSTER={ㄳ:['ㄱ','ㅅ'],ㄵ:['ㄴ','ㅈ'],ㄺ:['ㄹ','ㄱ'],ㄻ:['ㄹ','ㅁ'],ㄼ:['ㄹ','ㅂ'],ㄽ:['ㄹ','ㅅ'],ㄾ:['ㄹ','ㅌ'],ㄿ:['ㄹ','ㅍ'],ㅄ:['ㅂ','ㅅ']};
+const KP_NEUTRAL={'':'','ㄱ':'ㄱ','ㄲ':'ㄱ','ㄳ':'ㄱ','ㄴ':'ㄴ','ㄵ':'ㄴ','ㄶ':'ㄴ','ㄷ':'ㄷ','ㄹ':'ㄹ','ㄺ':'ㄱ','ㄻ':'ㅁ','ㄼ':'ㄹ','ㄽ':'ㄹ','ㄾ':'ㄹ','ㄿ':'ㅂ','ㅀ':'ㄹ','ㅁ':'ㅁ','ㅂ':'ㅂ','ㅄ':'ㅂ','ㅅ':'ㄷ','ㅆ':'ㄷ','ㅇ':'ㅇ','ㅈ':'ㄷ','ㅊ':'ㄷ','ㅋ':'ㄱ','ㅌ':'ㄷ','ㅍ':'ㅂ','ㅎ':'ㄷ'};
+const KP_TENSE={ㄱ:'ㄲ',ㄷ:'ㄸ',ㅂ:'ㅃ',ㅅ:'ㅆ',ㅈ:'ㅉ'};
+const KP_ASPIRATE={ㄱ:'ㅋ',ㄷ:'ㅌ',ㅂ:'ㅍ',ㅈ:'ㅊ'};
+const KP_NASAL={ㄱ:'ㅇ',ㄷ:'ㄴ',ㅂ:'ㅁ'};
+function kpDecompose(ch){
+  const code=ch.charCodeAt(0)-0xAC00;
+  if(code<0||code>11171)return null;
+  const cho=Math.floor(code/588), jung=Math.floor((code%588)/28), jong=code%28;
+  return {ini:KP_CHO[cho], med:KP_JUNG[jung], fin:KP_JONG[jong]};
+}
+function kpCompose(s){
+  const c=KP_CHO.indexOf(s.ini), j=KP_JUNG.indexOf(s.med), f=KP_JONG.indexOf(s.fin||'');
+  if(c<0||j<0)return '';
+  return String.fromCharCode(0xAC00+(c*21+j)*28+f);
+}
+function kpTransformPair(cur,next,nextIsFinalDa){
+  if(!cur.fin)return;
+  const rep=KP_NEUTRAL[cur.fin];
+  if(!next){ cur.fin=KP_NEUTRAL[cur.fin]; return; }
+  if(next.ini==='ㅇ'){
+    if(cur.fin==='ㅎ'){ cur.fin=''; return; }
+    if(cur.fin==='ㄶ'){ next.ini='ㄴ'; cur.fin=''; return; }
+    if(cur.fin==='ㅀ'){ next.ini='ㄹ'; cur.fin=''; return; }
+    if((cur.fin==='ㄷ'||cur.fin==='ㅌ')&&next.med==='ㅣ'){ next.ini=(cur.fin==='ㄷ')?'ㅈ':'ㅊ'; cur.fin=''; return; }
+    const cl=KP_CLUSTER[cur.fin];
+    if(cl){ cur.fin=cl[0]; next.ini=cl[1]; } else { next.ini=cur.fin; cur.fin=''; }
+    return;
+  }
+  if(next.ini==='ㄴ'&&cur.fin==='ㄹ'){ next.ini='ㄹ'; return; } // 유음화(逆方向): 설날→설랄
+  if(next.ini==='ㄴ'||next.ini==='ㅁ'){
+    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ cur.fin=KP_NASAL[rep]; return; }
+  }
+  if(next.ini==='ㄹ'){
+    if(cur.fin==='ㄴ'){ cur.fin='ㄹ'; return; }
+    cur.fin=KP_NEUTRAL[cur.fin]; return;
+  }
+  // 用言語幹の受음ㄴ/ㅁ(ㄵ/ㄻ含む)+辞書形語尾「다」→ 濃音化(表準発音法24項): 앉다→안따, 신다→신따
+  // ※名詞+名詞の複合語(例:한국어)と区別するため、直後がちょうど語末の「다」の場合のみ適用
+  if(nextIsFinalDa&&(cur.fin==='ㄴ'||cur.fin==='ㄵ'||cur.fin==='ㅁ'||cur.fin==='ㄻ')){
+    next.ini=KP_TENSE['ㄷ']; cur.fin=(cur.fin==='ㄴ'||cur.fin==='ㄵ')?'ㄴ':'ㅁ'; return;
+  }
+  if(next.ini==='ㄱ'||next.ini==='ㄷ'||next.ini==='ㅂ'||next.ini==='ㅅ'||next.ini==='ㅈ'){
+    if(cur.fin==='ㅎ'||cur.fin==='ㄶ'||cur.fin==='ㅀ'){
+      if(next.ini!=='ㅅ'){ next.ini=KP_ASPIRATE[next.ini]; cur.fin=(cur.fin==='ㄶ')?'ㄴ':(cur.fin==='ㅀ'?'ㄹ':''); return; }
+    }
+    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ next.ini=KP_TENSE[next.ini]; cur.fin=rep; return; }
+  }
+  if(next.ini==='ㅎ'){
+    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ next.ini=KP_ASPIRATE[rep]; cur.fin=''; return; }
+  }
+  cur.fin=KP_NEUTRAL[cur.fin];
+}
+function kpToken(word){
+  const syl=[...word].map(kpDecompose);
+  if(syl.some(s=>s===null))return word; // ハングル以外を含む場合はそのまま
+  for(let i=0;i<syl.length;i++){
+    const next=syl[i+1]||null;
+    const nextIsFinalDa=!!next && i+1===syl.length-1 && next.ini==='ㄷ' && next.med==='ㅏ' && next.fin==='';
+    kpTransformPair(syl[i], next, nextIsFinalDa);
+  }
+  return syl.map(kpCompose).join('');
+}
+// 単語/短文全体の実際の発音を返す（空白・記号はそのまま、ハングルのみの区切りごとに変換）
+function koPron(text){
+  return text.split(/([^가-힣]+)/).map(tok=>/^[가-힣]+$/.test(tok)?kpToken(tok):tok).join('');
+}
+
+/* ============================================================
    画面構築
    ============================================================ */
 const TABS=[
@@ -536,7 +612,7 @@ function buildVocab(){
   <div class="progressbar"><i id="vbar"></i></div>
   <div class="flash" id="flash">
     <div class="flinner">
-      <div class="fface ffront"><div class="fko" id="fko">가다</div><div class="from" id="from">タップで意味</div><button class="spk big" id="fspk" onclick="speakKo(document.getElementById('fko').textContent,event)" title="読み上げ">🔊 発音を聞く</button></div>
+      <div class="fface ffront"><div class="fko" id="fko">가다</div><div class="fpron" id="fpron"></div><div class="from" id="from">タップで意味</div><button class="spk big" id="fspk" onclick="speakKo(document.getElementById('fko').textContent,event)" title="読み上げ">🔊 発音を聞く</button></div>
       <div class="fface fback"><div class="fja" id="fja"></div><div class="fcat" id="fcat"></div></div>
     </div>
   </div>
@@ -569,6 +645,8 @@ function renderCard(){
   const v=vlist[vidx];
   document.getElementById("flash").classList.remove("flipped");
   document.getElementById("fko").textContent=v[0];
+  const pron=koPron(v[0]);
+  document.getElementById("fpron").textContent=(pron!==v[0])?("["+pron+"]"):"";
   document.getElementById("fja").textContent=v[1];
   document.getElementById("fcat").textContent=v[2];
   const known=store.get("known",[]);
