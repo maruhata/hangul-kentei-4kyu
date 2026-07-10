@@ -400,42 +400,44 @@ function kpCompose(s){
   if(c<0||j<0)return '';
   return String.fromCharCode(0xAC00+(c*21+j)*28+f);
 }
-function kpTransformPair(cur,next,nextIsFinalDa){
+function kpTransformPair(cur,next,nextIsFinalDa,tags){
   if(!cur.fin)return;
   const rep=KP_NEUTRAL[cur.fin];
-  if(!next){ cur.fin=KP_NEUTRAL[cur.fin]; return; }
+  if(!next){ const b=cur.fin; cur.fin=KP_NEUTRAL[cur.fin]; if(tags&&b!==cur.fin)tags.add('終声規則'); return; }
   if(next.ini==='ㅇ'){
-    if(cur.fin==='ㅎ'){ cur.fin=''; return; }
-    if(cur.fin==='ㄶ'){ next.ini='ㄴ'; cur.fin=''; return; }
-    if(cur.fin==='ㅀ'){ next.ini='ㄹ'; cur.fin=''; return; }
-    if((cur.fin==='ㄷ'||cur.fin==='ㅌ')&&next.med==='ㅣ'){ next.ini=(cur.fin==='ㄷ')?'ㅈ':'ㅊ'; cur.fin=''; return; }
+    if(cur.fin==='ㅎ'){ cur.fin=''; if(tags)tags.add('ㅎ弱化'); return; }
+    if(cur.fin==='ㄶ'){ next.ini='ㄴ'; cur.fin=''; if(tags)tags.add('ㅎ弱化'); return; }
+    if(cur.fin==='ㅀ'){ next.ini='ㄹ'; cur.fin=''; if(tags)tags.add('ㅎ弱化'); return; }
+    if((cur.fin==='ㄷ'||cur.fin==='ㅌ')&&next.med==='ㅣ'){ next.ini=(cur.fin==='ㄷ')?'ㅈ':'ㅊ'; cur.fin=''; if(tags)tags.add('口蓋音化'); return; }
     const cl=KP_CLUSTER[cur.fin];
     if(cl){ cur.fin=cl[0]; next.ini=cl[1]; } else { next.ini=cur.fin; cur.fin=''; }
+    if(tags)tags.add('連音化');
     return;
   }
-  if(next.ini==='ㄴ'&&cur.fin==='ㄹ'){ next.ini='ㄹ'; return; } // 유음화(逆方向): 설날→설랄
+  if(next.ini==='ㄴ'&&cur.fin==='ㄹ'){ next.ini='ㄹ'; if(tags)tags.add('流音化'); return; } // 유음화(逆方向): 설날→설랄
   if(next.ini==='ㄴ'||next.ini==='ㅁ'){
-    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ cur.fin=KP_NASAL[rep]; return; }
+    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ cur.fin=KP_NASAL[rep]; if(tags)tags.add('鼻音化'); return; }
   }
   if(next.ini==='ㄹ'){
-    if(cur.fin==='ㄴ'){ cur.fin='ㄹ'; return; }
-    cur.fin=KP_NEUTRAL[cur.fin]; return;
+    if(cur.fin==='ㄴ'){ cur.fin='ㄹ'; if(tags)tags.add('流音化'); return; }
+    const b=cur.fin; cur.fin=KP_NEUTRAL[cur.fin]; if(tags&&b!==cur.fin)tags.add('終声規則');
+    return;
   }
   // 用言語幹の受음ㄴ/ㅁ(ㄵ/ㄻ含む)+辞書形語尾「다」→ 濃音化(表準発音法24項): 앉다→안따, 신다→신따
   // ※名詞+名詞の複合語(例:한국어)と区別するため、直後がちょうど語末の「다」の場合のみ適用
   if(nextIsFinalDa&&(cur.fin==='ㄴ'||cur.fin==='ㄵ'||cur.fin==='ㅁ'||cur.fin==='ㄻ')){
-    next.ini=KP_TENSE['ㄷ']; cur.fin=(cur.fin==='ㄴ'||cur.fin==='ㄵ')?'ㄴ':'ㅁ'; return;
+    next.ini=KP_TENSE['ㄷ']; cur.fin=(cur.fin==='ㄴ'||cur.fin==='ㄵ')?'ㄴ':'ㅁ'; if(tags)tags.add('濃音化'); return;
   }
   if(next.ini==='ㄱ'||next.ini==='ㄷ'||next.ini==='ㅂ'||next.ini==='ㅅ'||next.ini==='ㅈ'){
     if(cur.fin==='ㅎ'||cur.fin==='ㄶ'||cur.fin==='ㅀ'){
-      if(next.ini!=='ㅅ'){ next.ini=KP_ASPIRATE[next.ini]; cur.fin=(cur.fin==='ㄶ')?'ㄴ':(cur.fin==='ㅀ'?'ㄹ':''); return; }
+      if(next.ini!=='ㅅ'){ next.ini=KP_ASPIRATE[next.ini]; cur.fin=(cur.fin==='ㄶ')?'ㄴ':(cur.fin==='ㅀ'?'ㄹ':''); if(tags)tags.add('激音化'); return; }
     }
-    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ next.ini=KP_TENSE[next.ini]; cur.fin=rep; return; }
+    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ next.ini=KP_TENSE[next.ini]; cur.fin=rep; if(tags)tags.add('濃音化'); return; }
   }
   if(next.ini==='ㅎ'){
-    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ next.ini=KP_ASPIRATE[rep]; cur.fin=''; return; }
+    if(rep==='ㄱ'||rep==='ㄷ'||rep==='ㅂ'){ next.ini=KP_ASPIRATE[rep]; cur.fin=''; if(tags)tags.add('激音化'); return; }
   }
-  cur.fin=KP_NEUTRAL[cur.fin];
+  { const b=cur.fin; cur.fin=KP_NEUTRAL[cur.fin]; if(tags&&b!==cur.fin)tags.add('終声規則'); }
 }
 function kpToken(word){
   const syl=[...word].map(kpDecompose);
@@ -450,6 +452,26 @@ function kpToken(word){
 // 単語/短文全体の実際の発音を返す（空白・記号はそのまま、ハングルのみの区切りごとに変換）
 function koPron(text){
   return text.split(/([^가-힣]+)/).map(tok=>/^[가-힣]+$/.test(tok)?kpToken(tok):tok).join('');
+}
+// 実際の発音と、働いた発音規則名(連音化・濃音化・鼻音化など)を返す（クイズ用）
+function kpTokenWithTags(word){
+  const syl=[...word].map(kpDecompose);
+  if(syl.some(s=>s===null))return {pron:word,tags:[]};
+  const tags=new Set();
+  for(let i=0;i<syl.length;i++){
+    const next=syl[i+1]||null;
+    const nextIsFinalDa=!!next && i+1===syl.length-1 && next.ini==='ㄷ' && next.med==='ㅏ' && next.fin==='';
+    kpTransformPair(syl[i], next, nextIsFinalDa, tags);
+  }
+  return {pron:syl.map(kpCompose).join(''), tags:[...tags]};
+}
+function koPronWithTags(text){
+  const tagSet=new Set();
+  const pron=text.split(/([^가-힣]+)/).map(tok=>{
+    if(/^[가-힣]+$/.test(tok)){ const r=kpTokenWithTags(tok); r.tags.forEach(t=>tagSet.add(t)); return r.pron; }
+    return tok;
+  }).join('');
+  return {pron, tags:[...tagSet]};
 }
 
 /* ---------- IPA(国際音声記号)変換 ----------
@@ -836,23 +858,23 @@ function genGrammar(){
     return {q:`${q}<div style="color:var(--muted);font-size:13px;margin-top:6px">（${hint}）</div>`,opts};
   });
 }
-const PQ=[
-  ["한국어 の実際の発音は？","[한구거]","[한국어]","[한구커]","[항구거]"],
-  ["학교 の実際の発音は？","[학꾜]","[학교]","[하교]","[항교]"],
-  ["입니다 の実際の発音は？","[임니다]","[입니다]","[인니다]","[이비다]"],
-  ["좋아요 の実際の発音は？","[조아요]","[졷아요]","[조하요]","[좋가요]"],
-  ["같이 の実際の発音は？","[가치]","[가티]","[갇이]","[가시]"],
-  ["연락 の実際の発音は？","[열락]","[연낙]","[연락]","[열낙]"],
-  ["옷이 の実際の発音は？","[오시]","[옫이]","[오디]","[옷이]"],
-  ["축하 の実際の発音は？","[추카]","[추가]","[축하]","[추하]"],
-  ["식당 の実際の発音は？","[식땅]","[식당]","[싣당]","[신땅]"],
-  ["음악 の実際の発音は？","[으막]","[음악]","[음막]","[으악]"],
-];
+// 単語帳の語から動的に生成：パッチム・連音化・濃音化・鼻音化・激音化などが
+// 実際に働く単語を使って「実際の発音」を選ばせるクイズ
 function genPron(){
-  return shuffle(PQ).slice(0,10).map(row=>{
-    const [q,correct,...wrong]=row;
-    const opts=shuffle([[correct,true],...wrong.map(w=>[w,false])]);
-    return {q:`<span class="big" style="font-size:24px">${q.split(" ")[0]}</span><div style="margin-top:6px">実際の発音は？</div>`,opts};
+  const pool=VOCAB.map(v=>{ const r=koPronWithTags(v[0]); return {v,pron:r.pron,tags:r.tags}; })
+                  .filter(x=>x.pron!==x.v[0]);
+  const chosen=shuffle(pool).slice(0,10);
+  return chosen.map(({v,pron,tags})=>{
+    const naive=v[0]; // つづりそのまま読み(典型的な誤答)
+    const others=shuffle(pool.filter(x=>x.pron!==pron&&x.pron!==naive)).map(x=>x.pron);
+    const distractors=[...new Set(others)].slice(0,2);
+    while(distractors.length<2)distractors.push(naive+'…');
+    const opts=shuffle([[pron,true],[naive,false],...distractors.map(d=>[d,false])]);
+    const explain=tags.length?`<div style="margin-top:8px;font-size:12.5px;color:var(--accent2)">💡 ${tags.join('・')}</div>`:'';
+    return {
+      q:`<span class="big" style="font-size:26px">${v[0]}</span><div style="margin-top:4px;color:var(--muted);font-size:13px">(${v[1]})</div><div style="margin-top:6px">実際の発音は？</div>`,
+      opts, explain
+    };
   });
 }
 function genMix(){
@@ -872,6 +894,7 @@ function renderQuiz(){
     <div class="qmeta"><span>第 ${quiz.i+1} / ${quiz.items.length} 問</span><span>正解 ${quiz.correct}</span></div>
     <div class="qq">${it.q}</div>
     <div id="opts"></div>
+    <div id="explain"></div>
     <div id="next" style="text-align:right;margin-top:10px;display:none">
       <button class="btn primary" onclick="quiz.i++;quiz.answered=false;renderQuiz()">次へ ▶</button>
     </div>
@@ -899,6 +922,7 @@ function answer(btn,ok,it){
   });
   if(ok){btn.classList.add("correct");quiz.correct++;}
   else{btn.classList.add("wrong");}
+  if(it.explain){ const ex=document.getElementById("explain"); if(ex)ex.innerHTML=it.explain; }
   document.getElementById("next").style.display="block";
 }
 function finishQuiz(){
